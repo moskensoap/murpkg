@@ -208,3 +208,19 @@ int check_repo_status_and_reclone_if_needed()
 
     return 0;
 }
+
+
+int contain_underline_underline(const char *str)
+{
+    for (int i = 0; i < strlen(str); i++)
+    {
+        if (str[i] == '_')
+        {
+            if (str[i + 1] == '_')
+            {
+                return 1;
+            }
+        }
+    }
+    return 0;
+}

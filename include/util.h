@@ -10,6 +10,6 @@ int init();
 int check_REPO_FILE_existence_and_init();
 int check_repo_status_and_reclone_if_needed();
 
-
+int contain_underline_underline(const char *str);
 
 #endif

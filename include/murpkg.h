@@ -16,6 +16,7 @@
 #include "clean.h"
 #include "info.h"
 #include "list.h"
+#include "remove.h"
 #include "repo.h"
 #include "search.h"
 #include "show.h"

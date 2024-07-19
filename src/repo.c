@@ -42,7 +42,7 @@ int repo_list()
     {
         return 1;
     }
-    printf("/home/.mur/murpkg/repo.txt contents:\n");
+    printf("%s contents:\n", REPO_FILE);
     printf("name\t\turl\n");
     printf("--------------------------------------->\n");
     // odd lines are names, even lines are urls, even lines print begin with \t
@@ -74,7 +74,7 @@ int repo_list()
     fclose(file);
 
     printf("--------------------------------------->\n\n");
-    printf("Directories in /home/.mur/murpkg/repo/:\n");
+    printf("Directories in %s:\n", REPO_PATH);
     printf("--------------------------------------->\n");
     // cd REPO_PATH && ls -d */
     char command_cd_ls[2 * PATH_MAX];
@@ -90,7 +90,7 @@ int repo_list()
 
 int repo_add(char *name, char *url)
 {
-    //if name comtains / or . or .. or whitespace, return 1
+    // if name comtains / or . or .. or whitespace, return 1
     if (strchr(name, '/') != NULL || strchr(name, '.') != NULL || strchr(name, ' ') != NULL || strcmp(name, "..") == 0)
     {
         fprintf(stderr, "Error: invalid name\n");
@@ -116,6 +116,7 @@ int repo_add(char *name, char *url)
     if (system(command_cd_gitclone) != 0)
     {
         perror("system");
+        repo_remove(name);
         return 1;
     }
 
@@ -123,9 +124,10 @@ int repo_add(char *name, char *url)
     if (url_to_reponame(url, reponame) != 0)
     {
         fprintf(stderr, "Error: could not extract reponame from url\n");
+        repo_remove(name);
         return 1;
     }
-    //combine REPO_PATH and reponame to REPO_PATH_NAME
+    // combine REPO_PATH and reponame to REPO_PATH_NAME
     char REPO_PATH_NAME[3 * PATH_MAX];
     snprintf(REPO_PATH_NAME, sizeof(REPO_PATH_NAME), "%s/%s", REPO_PATH, reponame);
 

@@ -63,7 +63,7 @@ int create_directory(const char *path)
 int is_git_repo(const char *path)
 {
     char command[10 * PATH_MAX];
-    snprintf(command, sizeof(command), "cd %s && git rev-parse --is-inside-work-tree 2>/dev/null", path);
+    snprintf(command, sizeof(command), "cd %s && /usr/bin/git rev-parse --is-inside-work-tree 2>/dev/null", path);
 
     FILE *fp = popen(command, "r");
     if (fp == NULL)
@@ -107,6 +107,19 @@ int url_to_reponame(const char *url, char *reponame)
     return -1;
 }
 
+int init()
+{
+    if (check_REPO_FILE_existence_and_init() != 0)
+    {
+        return 1;
+    }
+    if (check_repo_status_and_reclone_if_needed() != 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 int check_REPO_FILE_existence_and_init()
 {
     if (file_exists(REPO_FILE) == 0)
@@ -119,6 +132,7 @@ int check_REPO_FILE_existence_and_init()
             {
                 return 1;
             }
+            printf("%s is initialized.\n\n", REPO_FILE);
         }
         else
         {
@@ -192,18 +206,5 @@ int check_repo_status_and_reclone_if_needed()
     free(line);
     fclose(file);
 
-    return 0;
-}
-
-int init()
-{
-    if (check_REPO_FILE_existence_and_init() != 0)
-    {
-        return 1;
-    }
-    if (check_repo_status_and_reclone_if_needed() != 0)
-    {
-        return 1;
-    }
     return 0;
 }

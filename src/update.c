@@ -14,7 +14,6 @@ int git_pull_repo(const char *path)
 
 int update()
 {
-    init();
     // for every REPO_NAME in REPO_FILE do git_pull_repo(REPO_PATH_NAME/REPO_NAME)
     FILE *file = fopen(REPO_FILE, "r");
     if (file == NULL)
@@ -45,7 +44,7 @@ int update()
             snprintf(REPO_PATH_NAME, sizeof(REPO_PATH_NAME), "%s/%s", REPO_PATH, REPO_NAME);
 
             printf("Updating %s\n", REPO_NAME);
-            
+
             if (git_pull_repo(REPO_PATH_NAME) != 0)
             {
                 perror("git_pull_repo");

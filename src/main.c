@@ -7,13 +7,13 @@ int main(int argc, char *argv[])
         info_help();
         return 0;
     }
-
+    // ######################################version################################################
     if (strcmp(argv[1], "version") == 0)
     {
         info_version();
         return 0;
     }
-
+    // ######################################help################################################
     if (strcmp(argv[1], "help") == 0)
     {
         if (strcmp(argv[2], "repo") == 0)
@@ -138,7 +138,9 @@ int main(int argc, char *argv[])
         info_help();
         return 0;
     }
-
+    // ######################################init################################################
+    init();
+    // ######################################update################################################
     if (strcmp(argv[1], "update") == 0)
     {
         if (argc != 2)
@@ -146,7 +148,7 @@ int main(int argc, char *argv[])
             info_help_update();
             return 0;
         }
-        
+
         return update();
     }
 
@@ -163,7 +165,7 @@ int main(int argc, char *argv[])
                 info_help_list();
                 return 0;
             }
-            
+
             return list_name_version();
         }
         if (strcmp(argv[2], "name") == 0)
@@ -173,13 +175,65 @@ int main(int argc, char *argv[])
                 info_help_list();
                 return 0;
             }
-            
+
             return list_name();
         }
         info_help();
         return 0;
     }
-
+    // ######################################search################################################
+    if (strcmp(argv[1], "search") == 0)
+    {
+        if (argc == 2)
+        {
+            return search_all();
+        }
+        if (argc == 3)
+        {
+            return search_one(argv[2]);
+        }
+        info_help_search();
+        return 0;
+    }
+    // ######################################show################################################
+    if (strcmp(argv[1], "show") == 0)
+    {
+        if (argc == 2)
+        {
+            info_help_show();
+            return 0;
+        }
+        if (argc == 3)
+        {
+            return show_one_package(argv[2]);
+        }
+        if (argc > 3)
+        {
+            return show_packages(argc, argv);
+        }
+        info_help();
+        return 0;
+    }
+    // ######################################install################################################
+    // ######################################upgrade################################################
+    // ######################################remove################################################
+    // ######################################autoremove################################################
+    if(strcmp(argv[1], "autoremove") == 0){
+        if(argc != 2){
+            info_help_autoremove();
+            return 0;
+        }
+        return autoremove();
+    }
+    // ######################################clean################################################
+    if(strcmp(argv[1], "clean") == 0){
+        if(argc != 2){
+            info_help_clean();
+            return 0;
+        }
+        return clean();
+    }
+    // ######################################help################################################
     info_help();
     return 0;
 }

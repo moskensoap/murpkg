@@ -1,6 +1,6 @@
 #include "murpkg.h"
 
-const char *version = "0.1.1";
+const char *version = "0.1.2";
 
 void info_help()
 {
@@ -21,6 +21,7 @@ void info_help()
     printf("\tautoremove\tAutomatically remove unneeded packages.\n");
     printf("\tclean\t\tClean up the package cache.\n");
     printf("\thelp\t\tShow this help message.\n");
+    printf("\tversion\t\tShow the version of murpkg.\n");
 }
 
 void info_version()
@@ -49,24 +50,28 @@ void info_help_repo_list()
     printf("\tNAME\t\t\tURL\n");
 }
 
-void info_help_repo_add(){
+void info_help_repo_add()
+{
     printf("Usage:\n\n");
     printf("\tmurpkg repo add <name> <url>\n\n");
 }
 
-void info_help_repo_remove(){
+void info_help_repo_remove()
+{
     printf("Usage:\n\n");
     printf("\tmurpkg repo remove <name>\n\n");
 }
 
-void info_help_update(){
+void info_help_update()
+{
     printf("Usage:\n\n");
     printf("\tmurpkg update\n\n");
     printf("Description:\n\n");
     printf("\tUpdate the package database.\n");
 }
 
-void info_help_list(){
+void info_help_list()
+{
     printf("Usage:\n\n");
     printf("\tmurpkg list\n\n");
     printf("\tmurpkg list version\n\n");
@@ -78,58 +83,80 @@ void info_help_list(){
     printf("\tList all installed packages with name only.\n");
 }
 
-void info_help_search(){
+void info_help_search()
+{
+    printf("Usage:\n\n");
+    printf("\tmurpkg search\n\n");
+    printf("Description:\n\n");
+    printf("\tSearch for all package in the repositories.\n");
+
     printf("Usage:\n\n");
     printf("\tmurpkg search <package>\n\n");
     printf("Description:\n\n");
     printf("\tSearch for a package in the repositories.\n");
 }
 
-void info_help_show(){
+void info_help_show()
+{
     printf("Usage:\n\n");
     printf("\tmurpkg show <package>\n\n");
     printf("Description:\n\n");
-    printf("\tShow detailed information about a package.\n");
+    printf("\tShow detailed information about a installed package.\n");
+
+    printf("Usage:\n\n");
+    printf("\tmurpkg show <package1> <package2> <package3> ...\n\n");
+    printf("Description:\n\n");
+    printf("\tShow detailed information about multiple installed packages.\n");
 }
 
-void info_help_install(){
+void info_help_install()
+{
     printf("Usage:\n\n");
     printf("\tmurpkg install <package>\n\n");
     printf("Description:\n\n");
     printf("\tInstall a package.\n");
 }
 
-void info_help_upgrade(){
+void info_help_upgrade()
+{
     printf("Usage:\n\n");
     printf("\tmurpkg upgrade\n\n");
     printf("Description:\n\n");
     printf("\tUpgrade all installed packages to the latest version.\n");
 }
 
-void info_help_remove(){
+void info_help_remove()
+{
     printf("Usage:\n\n");
     printf("\tmurpkg remove <package>\n\n");
     printf("Description:\n\n");
     printf("\tRemove a package.\n");
 }
 
-void info_help_autoremove(){
+void info_help_autoremove()
+{
     printf("Usage:\n\n");
     printf("\tmurpkg autoremove\n\n");
     printf("Description:\n\n");
     printf("\tAutomatically remove unneeded packages.\n");
 }
 
-void info_help_clean(){
+void info_help_clean()
+{
     printf("Usage:\n\n");
     printf("\tmurpkg clean\n\n");
     printf("Description:\n\n");
     printf("\tClean up the package cache.\n");
 }
 
-void info_help_help(){
+void info_help_help()
+{
     printf("Usage:\n\n");
     printf("\tmurpkg help\n\n");
     printf("Description:\n\n");
     printf("\tShow this help message.\n");
+    printf("Usage:\n\n");
+    printf("\tmurpkg help <command>\n\n");
+    printf("Description:\n\n");
+    printf("\tShow help message for a specific command.\n");
 }

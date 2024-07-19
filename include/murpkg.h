@@ -12,9 +12,13 @@
 #include <ctype.h>
 
 
+#include "autoremove.h"
+#include "clean.h"
 #include "info.h"
 #include "list.h"
 #include "repo.h"
+#include "search.h"
+#include "show.h"
 #include "update.h"
 #include "util.h"
 

@@ -3,7 +3,7 @@
 const char *REPO_PATH = "/home/.mur/murpkg/repo/";
 const char *REPO_FILE = "/home/.mur/murpkg/repo.txt";
 const char *TEMP_PATH = "/home/.mur/murpkg/.temp/";
-const char *TEMP_FILE = "/home/.mur/murpkg/.temp/repo_temp.txt";
+const char *REPO_TEMP = "/home/.mur/murpkg/.temp/repo_temp.txt";
 
 int repo_init()
 {
@@ -163,7 +163,7 @@ int repo_remove(char *name)
         return 1;
     }
 
-    FILE *temp = fopen(TEMP_FILE, "w");
+    FILE *temp = fopen(REPO_TEMP, "w");
     if (temp == NULL)
     {
         perror("fopen");
@@ -236,7 +236,7 @@ int repo_remove(char *name)
         perror("remove");
         return 1;
     }
-    if (rename(TEMP_FILE, REPO_FILE) != 0)
+    if (rename(REPO_TEMP, REPO_FILE) != 0)
     {
         perror("rename");
         return 1;

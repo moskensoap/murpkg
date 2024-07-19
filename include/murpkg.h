@@ -13,8 +13,11 @@
 
 
 #include "info.h"
+#include "list.h"
 #include "repo.h"
+#include "update.h"
 #include "util.h"
+
 
 
 #endif

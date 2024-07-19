@@ -1,6 +1,9 @@
 #ifndef INFO_H
 #define INFO_H
 
+extern const char *VERSION;
+
+
 void info_help();
 void info_version();
 

@@ -1,6 +1,6 @@
 #include "murpkg.h"
 
-const char *version = "0.1.0";
+const char *version = "0.1.1";
 
 void info_help()
 {
@@ -69,8 +69,13 @@ void info_help_update(){
 void info_help_list(){
     printf("Usage:\n\n");
     printf("\tmurpkg list\n\n");
+    printf("\tmurpkg list version\n\n");
     printf("Description:\n\n");
-    printf("\tList all installed packages.\n");
+    printf("\tList all installed packages with name and version.\n");
+    printf("Usage:\n\n");
+    printf("\tmurpkg list name\n\n");
+    printf("Description:\n\n");
+    printf("\tList all installed packages with name only.\n");
 }
 
 void info_help_search(){

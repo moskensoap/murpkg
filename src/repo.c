@@ -2,17 +2,17 @@
 
 const char *REPO_PATH = "/home/.mur/murpkg/repo/";
 const char *REPO_FILE = "/home/.mur/murpkg/repo.txt";
-const char *TEMP_PATH = "/home/.mur/murpkg/temp/";
-const char *TEMP_FILE = "/home/.mur/murpkg/temp/repo_temp.txt";
+const char *TEMP_PATH = "/home/.mur/murpkg/.temp/";
+const char *TEMP_FILE = "/home/.mur/murpkg/.temp/repo_temp.txt";
 
-void repo_init()
+int repo_init()
 {
     if (file_exists(REPO_PATH) == 0)
     {
         if (create_directory(REPO_PATH) != 0)
         {
             perror("mkdir");
-            exit(EXIT_FAILURE);
+            return 1;
         }
     }
 
@@ -20,28 +20,37 @@ void repo_init()
     if (file == NULL)
     {
         perror("fopen");
-        exit(EXIT_FAILURE);
+        return 1;
     }
     fprintf(file, "MUR\n");
     fprintf(file, "https://github.com/moskensoap/MUR-packages.git\n");
     fclose(file);
 
     char command_cd_gitclone[2 * PATH_MAX];
-    snprintf(command_cd_gitclone, sizeof(command_cd_gitclone), "cd %s && rm -rf ./* && git clone https://github.com/moskensoap/MUR-packages.git", REPO_PATH);
+    snprintf(command_cd_gitclone, sizeof(command_cd_gitclone), "cd %s && /usr/bin/rm -rf ./* && /usr/bin/git clone https://github.com/moskensoap/MUR-packages.git", REPO_PATH);
     if (system(command_cd_gitclone) != 0)
     {
         perror("system");
-        exit(EXIT_FAILURE);
+        return 1;
     }
+    return 0;
 }
-void repo_list()
+
+int repo_list()
 {
+    if (check_REPO_FILE_existence_and_init() != 0)
+    {
+        return 1;
+    }
+    printf("/home/.mur/murpkg/repo.txt contents:\n");
+    printf("name\t\turl\n");
+    printf("--------------------------------------->\n");
     // odd lines are names, even lines are urls, even lines print begin with \t
     FILE *file = fopen(REPO_FILE, "r");
     if (file == NULL)
     {
         perror("fopen");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     char *line = NULL;
@@ -63,37 +72,85 @@ void repo_list()
     }
     free(line);
     fclose(file);
+
+    printf("--------------------------------------->\n\n");
+    printf("Directories in /home/.mur/murpkg/repo/:\n");
+    printf("--------------------------------------->\n");
+    // cd REPO_PATH && ls -d */
+    char command_cd_ls[2 * PATH_MAX];
+    snprintf(command_cd_ls, sizeof(command_cd_ls), "cd %s && /usr/bin/ls -d */", REPO_PATH);
+    if (system(command_cd_ls) != 0)
+    {
+        perror("system");
+        return 1;
+    }
+    printf("--------------------------------------->\n\n");
+    return 0;
 }
 
-void repo_add(char *name, char *url)
+int repo_add(char *name, char *url)
 {
+    //if name comtains / or . or .. or whitespace, return 1
+    if (strchr(name, '/') != NULL || strchr(name, '.') != NULL || strchr(name, ' ') != NULL || strcmp(name, "..") == 0)
+    {
+        fprintf(stderr, "Error: invalid name\n");
+        return 1;
+    }
+
+    if (check_REPO_FILE_existence_and_init() != 0)
+    {
+        return 1;
+    }
     FILE *file = fopen(REPO_FILE, "a");
     if (file == NULL)
     {
         perror("fopen");
-        exit(EXIT_FAILURE);
+        return 1;
     }
     fprintf(file, "%s\n", name);
     fprintf(file, "%s\n", url);
     fclose(file);
 
-    char command_cd_gitclone[2 * PATH_MAX];
-    snprintf(command_cd_gitclone, sizeof(command_cd_gitclone), "cd %s && git clone %s", REPO_PATH, url);
+    char command_cd_gitclone[3 * PATH_MAX];
+    snprintf(command_cd_gitclone, sizeof(command_cd_gitclone), "cd %s && /usr/bin/git clone %s", REPO_PATH, url);
     if (system(command_cd_gitclone) != 0)
     {
         perror("system");
-        exit(EXIT_FAILURE);
+        return 1;
     }
+
+    char reponame[PATH_MAX];
+    if (url_to_reponame(url, reponame) != 0)
+    {
+        fprintf(stderr, "Error: could not extract reponame from url\n");
+        return 1;
+    }
+    //combine REPO_PATH and reponame to REPO_PATH_NAME
+    char REPO_PATH_NAME[3 * PATH_MAX];
+    snprintf(REPO_PATH_NAME, sizeof(REPO_PATH_NAME), "%s/%s", REPO_PATH, reponame);
+
+    if (is_git_repo(REPO_PATH_NAME) == 0)
+    {
+        fprintf(stderr, "Error: %s is not a git repository\n", REPO_PATH_NAME);
+        repo_remove(name);
+        return 1;
+    }
+
+    return 0;
 }
 
-void repo_remove(char *name)
+int repo_remove(char *name)
 {
+    if (check_REPO_FILE_existence_and_init() != 0)
+    {
+        return 1;
+    }
     if (file_exists(TEMP_PATH) == 0)
     {
         if (create_directory(TEMP_PATH) != 0)
         {
             perror("mkdir");
-            exit(EXIT_FAILURE);
+            return 1;
         }
     }
 
@@ -101,14 +158,15 @@ void repo_remove(char *name)
     if (file == NULL)
     {
         perror("fopen");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     FILE *temp = fopen(TEMP_FILE, "w");
     if (temp == NULL)
     {
         perror("fopen");
-        exit(EXIT_FAILURE);
+        fclose(file);
+        return 1;
     }
 
     char *line = NULL;
@@ -146,12 +204,15 @@ void repo_remove(char *name)
                     char REPO_NAME[PATH_MAX];
                     strncpy(REPO_NAME, last_slash + 1, last_dot - last_slash - 1);
                     REPO_NAME[last_dot - last_slash - 1] = '\0';
-                    char command_rm[2 * PATH_MAX];
-                    snprintf(command_rm, sizeof(command_rm), "cd %s && rm -rf %s", REPO_PATH, REPO_NAME);
+                    char command_rm[3 * PATH_MAX];
+                    snprintf(command_rm, sizeof(command_rm), "cd %s && /usr/bin/rm -rf %s", REPO_PATH, REPO_NAME);
                     if (system(command_rm) != 0)
                     {
                         perror("system");
-                        exit(EXIT_FAILURE);
+                        free(line);
+                        fclose(file);
+                        fclose(temp);
+                        return 1;
                     }
                 }
                 found = 0;
@@ -171,11 +232,13 @@ void repo_remove(char *name)
     if (remove(REPO_FILE) != 0)
     {
         perror("remove");
-        exit(EXIT_FAILURE);
+        return 1;
     }
     if (rename(TEMP_FILE, REPO_FILE) != 0)
     {
         perror("rename");
-        exit(EXIT_FAILURE);
+        return 1;
     }
+
+    return 0;
 }

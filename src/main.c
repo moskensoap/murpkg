@@ -97,48 +97,89 @@ int main(int argc, char *argv[])
     {
         if (strcmp(argv[2], "init") == 0)
         {
-            if(argc != 3)
+            if (argc != 3)
             {
                 info_help_repo_init();
                 return 0;
             }
-            repo_init();
-            return 0;
+
+            return repo_init();
         }
         if (strcmp(argv[2], "list") == 0)
         {
-            if(argc != 3)
+            if (argc != 3)
             {
                 info_help_repo_list();
                 return 0;
             }
-            repo_list();
-            return 0;
+
+            return repo_list();
         }
         if (strcmp(argv[2], "add") == 0)
         {
-            if(argc != 5)
+            if (argc != 5)
             {
                 info_help_repo_add();
                 return 0;
             }
-            repo_add(argv[3], argv[4]);
-            return 0;
+
+            return repo_add(argv[3], argv[4]);
         }
         if (strcmp(argv[2], "remove") == 0)
         {
-            if(argc != 4)
+            if (argc != 4)
             {
                 info_help_repo_remove();
                 return 0;
             }
-            repo_remove(argv[3]);
-            return 0;
+
+            return repo_remove(argv[3]);
         }
+        info_help();
+        return 0;
     }
 
+    if (strcmp(argv[1], "update") == 0)
+    {
+        if (argc != 2)
+        {
+            info_help_update();
+            return 0;
+        }
+        
+        return update();
+    }
 
+    if (strcmp(argv[1], "list") == 0)
+    {
+        if (argc == 2)
+        {
+            return list_name_version();
+        }
+        if (strcmp(argv[2], "version") == 0)
+        {
+            if (argc != 3)
+            {
+                info_help_list();
+                return 0;
+            }
+            
+            return list_name_version();
+        }
+        if (strcmp(argv[2], "name") == 0)
+        {
+            if (argc != 3)
+            {
+                info_help_list();
+                return 0;
+            }
+            
+            return list_name();
+        }
+        info_help();
+        return 0;
+    }
 
-
+    info_help();
     return 0;
 }

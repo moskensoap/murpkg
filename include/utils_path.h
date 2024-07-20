@@ -14,6 +14,7 @@ extern char git_PATH[PATH_MAX];
 extern char ls_PATH[PATH_MAX];
 extern char pacman_PATH[PATH_MAX];
 extern char pactree_PATH[PATH_MAX];
+extern char echo_PATH[PATH_MAX];
 
 int init_relative_name_Binary_and_path();
 

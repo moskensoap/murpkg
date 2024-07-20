@@ -17,6 +17,7 @@ char git_PATH[PATH_MAX];
 char ls_PATH[PATH_MAX];
 char pacman_PATH[PATH_MAX];
 char pactree_PATH[PATH_MAX];
+char echo_PATH[PATH_MAX];
 
 int init_git_PATH()
 {
@@ -98,6 +99,10 @@ int init_relative_name_Binary_and_path()
         return 1;
     }
     if (replaceBinary(pactree_PATH, murpkgfileName, "pactree") != 0)
+    {
+        return 1;
+    }
+    if (replaceBinary(echo_PATH, murpkgfileName, "echo") != 0)
     {
         return 1;
     }

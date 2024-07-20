@@ -17,7 +17,7 @@ int remove_package(const char *package)
     dependent_packages[0] = '\0';
 
     // Construct the command to remove the package
-    snprintf(command, sizeof(command), "echo n | pacman -Rns %s 2>&1", package);
+    snprintf(command, sizeof(command), "%s n | %s -Rns %s 2>&1", echo_PATH, pacman_PATH, package);
 
     // Execute the command and open a pipe to read the output
     if ((fp = popen(command, "r")) == NULL)
@@ -91,7 +91,7 @@ int remove_package(const char *package)
             return 1;
         }
 
-        snprintf(newcommand, PATH_MAX + strlen(dependent_packages) + 1, "pacman -Rns %s", dependent_packages);
+        snprintf(newcommand, PATH_MAX + strlen(dependent_packages) + 1, "%s -Rns %s", pacman_PATH, dependent_packages);
 
         // Execute the command to remove dependent packages
         int ret = system(newcommand);
@@ -107,7 +107,7 @@ int remove_package(const char *package)
     else
     {
         free(dependent_packages);
-        snprintf(command, sizeof(command), "pacman -Rns %s", package);
+        snprintf(command, sizeof(command), "%s -Rns %s", pacman_PATH, package);
         if (system(command) != 0)
         {
             perror("system");

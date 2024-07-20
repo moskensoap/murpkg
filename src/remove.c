@@ -4,7 +4,7 @@
 
 int remove_package(const char *package)
 {
-    char command[PATH_MAX + strlen(package) + 1];
+    char command[3 * PATH_MAX + strlen(package) + 1];
     FILE *fp;
     char result[PATH_MAX];
     size_t buffer_size = INITIAL_BUFFER_SIZE;
@@ -83,7 +83,7 @@ int remove_package(const char *package)
         strcat(dependent_packages, " ");
 
         // Allocate a large buffer for the command
-        char *newcommand = (char *)malloc(PATH_MAX + strlen(dependent_packages) + 1);
+        char *newcommand = (char *)malloc(2 * PATH_MAX + strlen(dependent_packages) + 1);
         if (newcommand == NULL)
         {
             perror("malloc");
@@ -91,7 +91,7 @@ int remove_package(const char *package)
             return 1;
         }
 
-        snprintf(newcommand, PATH_MAX + strlen(dependent_packages) + 1, "%s -Rns %s", pacman_PATH, dependent_packages);
+        snprintf(newcommand, 2 * PATH_MAX + strlen(dependent_packages) + 1, "%s -Rns %s", pacman_PATH, dependent_packages);
 
         // Execute the command to remove dependent packages
         int ret = system(newcommand);

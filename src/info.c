@@ -1,6 +1,6 @@
 #include "murpkg.h"
 
-const char *version = "0.1.3";
+const char *version = "0.1.4";
 
 void info_help()
 {

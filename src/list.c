@@ -1,7 +1,9 @@
 #include "murpkg.h"
 
 int list_name_version(){
-    if(system("/usr/bin/pacman -Qm") != 0){
+    char command_pacman_Qm[2 * PATH_MAX];
+    snprintf(command_pacman_Qm, sizeof(command_pacman_Qm), "%s -Qm", pacman_PATH);
+    if(system(command_pacman_Qm) != 0){
         perror("system");
         return 1;
     }
@@ -9,7 +11,9 @@ int list_name_version(){
 }
 
 int list_name(){
-    if(system("/usr/bin/pacman -Qmq") != 0){
+    char command_pacman_Qmq[2 * PATH_MAX];
+    snprintf(command_pacman_Qmq, sizeof(command_pacman_Qmq), "%s -Qmq", pacman_PATH);
+    if(system(command_pacman_Qmq) != 0){
         perror("system");
         return 1;
     }

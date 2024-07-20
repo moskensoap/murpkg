@@ -1,10 +1,5 @@
 #include "murpkg.h"
 
-const char *REPO_PATH = "/home/.mur/murpkg/repo/";
-const char *REPO_FILE = "/home/.mur/murpkg/repo.txt";
-const char *TEMP_PATH = "/home/.mur/murpkg/.temp/";
-const char *REPO_TEMP = "/home/.mur/murpkg/.temp/repo_temp.txt";
-
 int repo_init()
 {
     if (file_exists(REPO_PATH) == 0)
@@ -26,8 +21,8 @@ int repo_init()
     fprintf(file, "https://github.com/moskensoap/MUR-packages.git\n");
     fclose(file);
 
-    char command_cd_gitclone[2 * PATH_MAX];
-    snprintf(command_cd_gitclone, sizeof(command_cd_gitclone), "cd %s && /usr/bin/rm -rf ./* && /usr/bin/git clone https://github.com/moskensoap/MUR-packages.git", REPO_PATH);
+    char command_cd_gitclone[4 * PATH_MAX];
+    snprintf(command_cd_gitclone, sizeof(command_cd_gitclone), "cd %s && %s -rf ./* && %s clone https://github.com/moskensoap/MUR-packages.git", REPO_PATH, rm_PATH, git_PATH);
     if (system(command_cd_gitclone) != 0)
     {
         perror("system");
@@ -77,8 +72,8 @@ int repo_list()
     printf("Directories in %s:\n", REPO_PATH);
     printf("--------------------------------------->\n");
     // cd REPO_PATH && ls -d */
-    char command_cd_ls[2 * PATH_MAX];
-    snprintf(command_cd_ls, sizeof(command_cd_ls), "cd %s && /usr/bin/ls -d */", REPO_PATH);
+    char command_cd_ls[3 * PATH_MAX];
+    snprintf(command_cd_ls, sizeof(command_cd_ls), "cd %s && %s -d */", REPO_PATH, ls_PATH);
     if (system(command_cd_ls) != 0)
     {
         perror("system");
@@ -111,8 +106,8 @@ int repo_add(char *name, char *url)
     fprintf(file, "%s\n", url);
     fclose(file);
 
-    char command_cd_gitclone[3 * PATH_MAX];
-    snprintf(command_cd_gitclone, sizeof(command_cd_gitclone), "cd %s && /usr/bin/git clone %s", REPO_PATH, url);
+    char command_cd_gitclone[3 * PATH_MAX + strlen(url)];
+    snprintf(command_cd_gitclone, sizeof(command_cd_gitclone), "cd %s && %s clone %s", REPO_PATH, git_PATH, url);
     if (system(command_cd_gitclone) != 0)
     {
         perror("system");
@@ -206,8 +201,8 @@ int repo_remove(char *name)
                     char REPO_NAME[PATH_MAX];
                     strncpy(REPO_NAME, last_slash + 1, last_dot - last_slash - 1);
                     REPO_NAME[last_dot - last_slash - 1] = '\0';
-                    char command_rm[3 * PATH_MAX];
-                    snprintf(command_rm, sizeof(command_rm), "cd %s && /usr/bin/rm -rf %s", REPO_PATH, REPO_NAME);
+                    char command_rm[4 * PATH_MAX];
+                    snprintf(command_rm, sizeof(command_rm), "cd %s && %s -rf %s", REPO_PATH, rm_PATH, REPO_NAME);
                     if (system(command_rm) != 0)
                     {
                         perror("system");

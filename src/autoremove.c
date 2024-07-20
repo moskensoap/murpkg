@@ -1,7 +1,11 @@
 #include "murpkg.h"
 
-int autoremove(){
-    if(system("/usr/bin/pacman -Rns $(/usr/bin/pacman -Qdtq)") != 0){
+int autoremove()
+{
+    char command_pacman_autoremove[3 * PATH_MAX];
+    snprintf(command_pacman_autoremove, sizeof(command_pacman_autoremove), "%s -Rns $(%s -Qdtq)", pacman_PATH, pacman_PATH);
+    if (system(command_pacman_autoremove) != 0)
+    {
         perror("system");
         return 1;
     }

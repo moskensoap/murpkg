@@ -1,5 +1,82 @@
 #include "murpkg.h"
 
+char murpkgPath[PATH_MAX];
+char murpkgfileName[PATH_MAX];
+
+int initialize_murpkgPath_and_murpkgfileName()
+{
+    ssize_t count = readlink("/proc/self/exe", murpkgPath, sizeof(murpkgPath) - 1);
+
+    if (count == -1)
+    {
+        perror("readlink");
+        return 1;
+    }
+
+    murpkgPath[count] = '\0'; // Null-terminate the murpkgPath
+
+    // change all characters to lowercase in murpkgPath
+    for (int i = 0; murpkgPath[i]; i++)
+    {
+        murpkgPath[i] = tolower(murpkgPath[i]);
+    }
+
+    strcpy(murpkgfileName, "murpkg");
+
+    return 0;
+}
+
+int replaceBinary(char *path, char *fileName, char *realName)
+{
+    strcpy(path, murpkgPath);
+    char binPath[PATH_MAX], realPath[PATH_MAX];
+    sprintf(binPath, "/local/bin/%s", fileName);
+    sprintf(realPath, "/bin/%s", realName);
+
+    char *replacePtr = strstr(path, binPath);
+    if (replacePtr != NULL)
+    {
+        memcpy(replacePtr, realPath, strlen(realPath));
+        replacePtr += strlen(realPath);
+        *replacePtr = '\0';
+    }
+    else
+    {
+        perror("strstr");
+        return 1;
+    }
+
+    return 0;
+}
+
+int replacePath(char *path, char *fileName, char *realName)
+{
+    strcpy(path, murpkgPath);
+    char binPath[PATH_MAX], realPath[PATH_MAX];
+    sprintf(binPath, "/usr/local/bin/%s", fileName);
+    sprintf(realPath, "%s", realName);
+
+    char *replacePtr = strstr(path, binPath);
+    if (replacePtr != NULL)
+    {
+        memcpy(replacePtr, realPath, strlen(realPath));
+        replacePtr += strlen(realPath);
+        *replacePtr = '\0';
+    }
+    else
+    {
+        perror("strstr");
+        return 1;
+    }
+
+    return 0;
+}
+
+// ###############################################################
+// ###############################################################
+// ###############################################################
+// ###############################################################
+
 /**
  * Checks if a file exists at the specified path.
  *
@@ -62,8 +139,8 @@ int create_directory(const char *path)
  */
 int is_git_repo(const char *path)
 {
-    char command[10 * PATH_MAX];
-    snprintf(command, sizeof(command), "cd %s && /usr/bin/git rev-parse --is-inside-work-tree 2>/dev/null", path);
+    char command[2 * PATH_MAX + strlen(path)];
+    snprintf(command, sizeof(command), "cd %s && %s rev-parse --is-inside-work-tree 2>/dev/null", path, git_PATH);
 
     FILE *fp = popen(command, "r");
     if (fp == NULL)
@@ -107,7 +184,7 @@ int url_to_reponame(const char *url, char *reponame)
     return -1;
 }
 
-int init()
+int init_repo()
 {
     if (check_REPO_FILE_existence_and_init() != 0)
     {
@@ -180,8 +257,8 @@ int check_repo_status_and_reclone_if_needed()
 
             if (is_git_repo(REPO_PATH_NAME) == 0)
             {
-                char command_rm_rf[4 * PATH_MAX];
-                snprintf(command_rm_rf, sizeof(command_rm_rf), "/usr/bin/rm -rf %s", REPO_PATH_NAME);
+                char command_rm_rf[5 * PATH_MAX];
+                snprintf(command_rm_rf, sizeof(command_rm_rf), "%s -rf %s", rm_PATH, REPO_PATH_NAME);
                 if (system(command_rm_rf) != 0)
                 {
                     perror("system");
@@ -190,8 +267,8 @@ int check_repo_status_and_reclone_if_needed()
                     return 1;
                 }
 
-                char command_cd_gitclone[3 * PATH_MAX];
-                snprintf(command_cd_gitclone, sizeof(command_cd_gitclone), "cd %s && /usr/bin/git clone %s", REPO_PATH, line);
+                char command_cd_gitclone[3 * PATH_MAX + strlen(line)];
+                snprintf(command_cd_gitclone, sizeof(command_cd_gitclone), "cd %s && %s clone %s", REPO_PATH, git_PATH, line);
                 if (system(command_cd_gitclone) != 0)
                 {
                     perror("system");
@@ -209,7 +286,6 @@ int check_repo_status_and_reclone_if_needed()
     return 0;
 }
 
-
 int contain_underline_underline(const char *str)
 {
     for (int i = 0; i < strlen(str); i++)
@@ -225,18 +301,13 @@ int contain_underline_underline(const char *str)
     return 0;
 }
 
+// ###############################################################
+// ###############################################################
+// ###############################################################
+// ###############################################################
 
-
-//###############################################################
-//###############################################################
-//###############################################################
-//###############################################################
-const char *STRUCT_TEMP = "/home/.mur/murpkg/.temp/struct_temp";
-
-
-
-
-void init_package(Package *pkg) {
+void init_package(Package *pkg)
+{
     pkg->pkgname = NULL;
     pkg->pkgver = NULL;
     pkg->pkgrel = NULL;
@@ -252,14 +323,14 @@ void init_package(Package *pkg) {
     pkg->depends_count = 0;
 }
 
-
-void init_package_list(PackageList *pkg_list) {
+void init_package_list(PackageList *pkg_list)
+{
     pkg_list->packages = NULL;
     pkg_list->package_count = 0;
 }
 
-
-void add_package(PackageList *pkg_list, const char *name, const char *version, const char *rel, const char *arch, const char *mingw_arch, const char *fullname, const char *desc, const char *abs_dir, const char *install_cmds, long long int level, int flag) {
+void add_package(PackageList *pkg_list, const char *name, const char *version, const char *rel, const char *arch, const char *mingw_arch, const char *fullname, const char *desc, const char *abs_dir, const char *install_cmds, long long int level, int flag)
+{
     pkg_list->packages = realloc(pkg_list->packages, (pkg_list->package_count + 1) * sizeof(Package));
     Package *new_pkg = &pkg_list->packages[pkg_list->package_count];
     init_package(new_pkg);
@@ -277,8 +348,8 @@ void add_package(PackageList *pkg_list, const char *name, const char *version, c
     pkg_list->package_count++;
 }
 
-
-void free_package(Package *pkg) {
+void free_package(Package *pkg)
+{
     free(pkg->pkgname);
     free(pkg->pkgver);
     free(pkg->pkgrel);
@@ -288,37 +359,39 @@ void free_package(Package *pkg) {
     free(pkg->pkgdesc);
     free(pkg->abs_dir);
     free(pkg->install_cmds);
-    for (int i = 0; i < pkg->depends_count; i++) {
+    for (int i = 0; i < pkg->depends_count; i++)
+    {
         free(pkg->depends[i]);
     }
     free(pkg->depends);
 }
 
-
-void free_package_list(PackageList *pkg_list) {
-    for (int i = 0; i < pkg_list->package_count; i++) {
+void free_package_list(PackageList *pkg_list)
+{
+    for (int i = 0; i < pkg_list->package_count; i++)
+    {
         free_package(&pkg_list->packages[i]);
     }
     free(pkg_list->packages);
 }
 
-
-void write_package_to_file(PackageList *pkg_list, const char *filename) {
+void write_package_to_file(PackageList *pkg_list, const char *filename)
+{
     FILE *file = fopen(filename, "wb");
-    if (!file) {
+    if (!file)
+    {
         perror("Failed to open file for writing");
         return;
     }
 
     fwrite(&pkg_list->package_count, sizeof(int), 1, file);
-    for (int i = 0; i < pkg_list->package_count; i++) {
+    for (int i = 0; i < pkg_list->package_count; i++)
+    {
         Package *pkg = &pkg_list->packages[i];
-
 
         fwrite(&pkg->level, sizeof(long long int), 1, file);
         fwrite(&pkg->flag, sizeof(int), 1, file);
         fwrite(&pkg->depends_count, sizeof(int), 1, file);
-
 
         size_t len = strlen(pkg->pkgname) + 1;
         fwrite(&len, sizeof(size_t), 1, file);
@@ -356,8 +429,8 @@ void write_package_to_file(PackageList *pkg_list, const char *filename) {
         fwrite(&len, sizeof(size_t), 1, file);
         fwrite(pkg->install_cmds, len, 1, file);
 
-
-        for (int j = 0; j < pkg->depends_count; j++) {
+        for (int j = 0; j < pkg->depends_count; j++)
+        {
             len = strlen(pkg->depends[j]) + 1;
             fwrite(&len, sizeof(size_t), 1, file);
             fwrite(pkg->depends[j], len, 1, file);
@@ -367,10 +440,11 @@ void write_package_to_file(PackageList *pkg_list, const char *filename) {
     fclose(file);
 }
 
-
-void read_package_from_file(PackageList *pkg_list, const char *filename) {
+void read_package_from_file(PackageList *pkg_list, const char *filename)
+{
     FILE *file = fopen(filename, "rb");
-    if (!file) {
+    if (!file)
+    {
         perror("Failed to open file for reading");
         return;
     }
@@ -378,15 +452,14 @@ void read_package_from_file(PackageList *pkg_list, const char *filename) {
     fread(&pkg_list->package_count, sizeof(int), 1, file);
     pkg_list->packages = malloc(pkg_list->package_count * sizeof(Package));
 
-    for (int i = 0; i < pkg_list->package_count; i++) {
+    for (int i = 0; i < pkg_list->package_count; i++)
+    {
         Package *pkg = &pkg_list->packages[i];
         init_package(pkg);
-
 
         fread(&pkg->level, sizeof(long long int), 1, file);
         fread(&pkg->flag, sizeof(int), 1, file);
         fread(&pkg->depends_count, sizeof(int), 1, file);
-
 
         size_t len;
         fread(&len, sizeof(size_t), 1, file);
@@ -425,9 +498,9 @@ void read_package_from_file(PackageList *pkg_list, const char *filename) {
         pkg->install_cmds = malloc(len);
         fread(pkg->install_cmds, len, 1, file);
 
-
         pkg->depends = malloc(pkg->depends_count * sizeof(char *));
-        for (int j = 0; j < pkg->depends_count; j++) {
+        for (int j = 0; j < pkg->depends_count; j++)
+        {
             fread(&len, sizeof(size_t), 1, file);
             pkg->depends[j] = malloc(len);
             fread(pkg->depends[j], len, 1, file);

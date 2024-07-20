@@ -2,8 +2,8 @@
 
 int git_pull_repo(const char *path)
 {
-    char command[10 * PATH_MAX];
-    snprintf(command, sizeof(command), "cd %s && /usr/bin/git pull", path);
+    char command[2 * PATH_MAX + strlen(path)];
+    snprintf(command, sizeof(command), "cd %s && %s pull", path, git_PATH);
     if (system(command) != 0)
     {
         perror("system");

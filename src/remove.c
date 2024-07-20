@@ -88,8 +88,8 @@ char *extract_dependencies(char *output)
  */
 int remove_one_package(const char *name)
 {
-    char command_pactree[2 * PATH_MAX];
-    snprintf(command_pactree, sizeof(command_pactree), "pactree --unique %s", name);
+    char command_pactree[2 * PATH_MAX + strlen(name)];
+    snprintf(command_pactree, sizeof(command_pactree), "%s --unique %s", pactree_PATH, name);
 
     char *pactree_output = read_pactree_output(command_pactree);
     if (pactree_output == NULL)
@@ -106,7 +106,7 @@ int remove_one_package(const char *name)
 
     printf("Dependency packages: %s\n", dependency);
 
-    snprintf(command_pactree, sizeof(command_pactree), "pactree --reverse --unique %s", name);
+    snprintf(command_pactree, sizeof(command_pactree), "%s --reverse --unique %s", pactree_PATH, name);
     char *pactree_reverse_output = read_pactree_output(command_pactree);
     if (pactree_reverse_output == NULL)
     {
@@ -139,7 +139,7 @@ int remove_one_package(const char *name)
     free(dependency);
     free(reverse_dependency);
 
-    size_t command_size = strlen(all_dependency) + 13;
+    size_t command_size = strlen(all_dependency) + 2 * PATH_MAX;
     char *command_pacman = malloc(command_size);
     if (command_pacman == NULL)
     {
@@ -147,7 +147,7 @@ int remove_one_package(const char *name)
         free(all_dependency);
         return 1;
     }
-    snprintf(command_pacman, command_size, "pacman -Rns %s", all_dependency);
+    snprintf(command_pacman, command_size, "%s -Rns %s", pacman_PATH, all_dependency);
     if (system(command_pacman) != 0)
     {
         perror("system");

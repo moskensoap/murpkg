@@ -21,7 +21,8 @@
 #include "search.h"
 #include "show.h"
 #include "update.h"
-#include "util.h"
+#include "utils_path.h"
+#include "utils.h"
 
 
 

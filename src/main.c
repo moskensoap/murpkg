@@ -92,7 +92,18 @@ int main(int argc, char *argv[])
         info_help();
         return 0;
     }
-
+    // ######################################init################################################
+    if (initialize_murpkgPath_and_murpkgfileName() != 0)
+    {
+        printf("Error: initialize_murpkgPath_and_murpkgfileName\n");
+        return 1;
+    }
+    if (init_relative_name_Binary_and_path() != 0)
+    {
+        printf("Error: init_relative_name_Binary_and_path\n");
+        return 1;
+    }
+    // ######################################repo################################################
     if (strcmp(argv[1], "repo") == 0)
     {
         if (strcmp(argv[2], "init") == 0)
@@ -139,7 +150,10 @@ int main(int argc, char *argv[])
         return 0;
     }
     // ######################################init################################################
-    init();
+    if(init_repo() != 0)
+    {
+        return 1;
+    }
     // ######################################update################################################
     if (strcmp(argv[1], "update") == 0)
     {
@@ -228,16 +242,20 @@ int main(int argc, char *argv[])
         return remove_one_package(argv[2]);
     }
     // ######################################autoremove################################################
-    if(strcmp(argv[1], "autoremove") == 0){
-        if(argc != 2){
+    if (strcmp(argv[1], "autoremove") == 0)
+    {
+        if (argc != 2)
+        {
             info_help_autoremove();
             return 0;
         }
         return autoremove();
     }
     // ######################################clean################################################
-    if(strcmp(argv[1], "clean") == 0){
-        if(argc != 2){
+    if (strcmp(argv[1], "clean") == 0)
+    {
+        if (argc != 2)
+        {
             info_help_clean();
             return 0;
         }

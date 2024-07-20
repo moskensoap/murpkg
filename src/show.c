@@ -3,7 +3,9 @@
 int show_one_package(const char *name)
 {
     // system run pacman -Qi <name>
-    char command[2 * PATH_MAX] = "/usr/bin/pacman -Qi ";
+    char command[2 * PATH_MAX];
+    snprintf(command, sizeof(command), "%s -Qi ", pacman_PATH);
+
     strcat(command, name);
 
     if (system(command) != 0)

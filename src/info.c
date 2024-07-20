@@ -131,6 +131,11 @@ void info_help_remove()
     printf("\tmurpkg remove <package>\n\n");
     printf("Description:\n\n");
     printf("\tRemove a package.\n");
+
+    printf("Usage:\n\n");
+    printf("\tmurpkg remove <package1> <package2> <package3> ...\n\n");
+    printf("Description:\n\n");
+    printf("\tRemove multiple packages.\n");
 }
 
 void info_help_autoremove()

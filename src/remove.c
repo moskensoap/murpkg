@@ -1,162 +1,118 @@
 #include "murpkg.h"
 
-/**
- * Reads the output of a command executed using popen and returns it as a dynamically allocated string.
- *
- * @param command The command to be executed.
- * @return A dynamically allocated string containing the output of the command, or NULL if an error occurred.
- */
-char *read_pactree_output(const char *command)
-{
-    FILE *file = popen(command, "r");
-    if (file == NULL)
-    {
-        perror("popen");
-        return NULL;
-    }
+#define INITIAL_BUFFER_SIZE PATH_MAX
 
-    size_t size = 0;
-    size_t buffer_size = 1024;
-    char *output = malloc(buffer_size);
-    if (output == NULL)
+int remove_package(const char *package)
+{
+    char command[PATH_MAX + strlen(package) + 1];
+    FILE *fp;
+    char result[PATH_MAX];
+    size_t buffer_size = INITIAL_BUFFER_SIZE;
+    char *dependent_packages = (char *)malloc(buffer_size);
+    if (dependent_packages == NULL)
     {
         perror("malloc");
-        pclose(file);
-        return NULL;
+        return 1;
+    }
+    dependent_packages[0] = '\0';
+
+    // Construct the command to remove the package
+    snprintf(command, sizeof(command), "echo n | pacman -Rns %s 2>&1", package);
+
+    // Execute the command and open a pipe to read the output
+    if ((fp = popen(command, "r")) == NULL)
+    {
+        perror("popen");
+        free(dependent_packages);
+        return 1;
     }
 
-    size_t read_size;
-    while ((read_size = fread(output + size, 1, buffer_size - size, file)) > 0)
+    // Read the output and look for dependencies
+    while (fgets(result, sizeof(result), fp) != NULL)
     {
-        size += read_size;
-        if (size >= buffer_size)
+        // Check if the line contains "required by"
+        char *required_by_ptr = strstr(result, "required by ");
+        if (required_by_ptr != NULL)
         {
-            buffer_size *= 2;
-            output = realloc(output, buffer_size);
-            if (output == NULL)
+            required_by_ptr += strlen("required by ");
+            char *token = strtok(required_by_ptr, " \n");
+            while (token != NULL)
             {
-                perror("realloc");
-                pclose(file);
-                return NULL;
+                size_t new_length = strlen(dependent_packages) + strlen(token) + 2; // +1 for space, +1 for '\0'
+                if (new_length > buffer_size)
+                {
+                    buffer_size = new_length;
+                    char *new_dependent_packages = (char *)realloc(dependent_packages, buffer_size);
+                    if (new_dependent_packages == NULL)
+                    {
+                        perror("realloc");
+                        free(dependent_packages);
+                        pclose(fp);
+                        return 1;
+                    }
+                    dependent_packages = new_dependent_packages;
+                }
+                strcat(dependent_packages, token);
+                strcat(dependent_packages, " ");
+                token = strtok(NULL, " \n");
             }
         }
     }
-    output[size] = '\0';
-    pclose(file);
 
-    return output;
-}
+    // Close the pipe
+    pclose(fp);
 
-/**
- * Extracts the dependencies from the given output string.
- *
- * @param output The output string containing the dependencies.
- * @return A dynamically allocated string containing the extracted dependencies.
- *         The caller is responsible for freeing the memory.
- *         Returns NULL if memory allocation fails.
- */
-char *extract_dependencies(char *output)
-{
-    size_t size = strlen(output) + 1;
-    char *dependencies = malloc(size);
-    if (dependencies == NULL)
+    // If there are dependent packages, try to remove them as well
+    if (strlen(dependent_packages) > 0)
     {
-        perror("malloc");
-        return NULL;
-    }
-    dependencies[0] = '\0';
-
-    char *line = strtok(output, "\n");
-    while (line != NULL)
-    {
-        if (contain_underline_underline(line))
+        // Append the initial package to the dependent packages list
+        size_t new_length = strlen(dependent_packages) + strlen(package) + 2; // +1 for space, +1 for '\0'
+        if (new_length > buffer_size)
         {
-            strcat(dependencies, line);
-            strcat(dependencies, " ");
+            buffer_size = new_length;
+            char *new_dependent_packages = (char *)realloc(dependent_packages, buffer_size);
+            if (new_dependent_packages == NULL)
+            {
+                perror("realloc");
+                free(dependent_packages);
+                return 1;
+            }
+            dependent_packages = new_dependent_packages;
         }
-        line = strtok(NULL, "\n");
+        strcat(dependent_packages, package);
+        strcat(dependent_packages, " ");
+
+        // Allocate a large buffer for the command
+        char *newcommand = (char *)malloc(PATH_MAX + strlen(dependent_packages) + 1);
+        if (newcommand == NULL)
+        {
+            perror("malloc");
+            free(dependent_packages);
+            return 1;
+        }
+
+        snprintf(newcommand, PATH_MAX + strlen(dependent_packages) + 1, "pacman -Rns %s", dependent_packages);
+
+        // Execute the command to remove dependent packages
+        int ret = system(newcommand);
+        free(newcommand);
+        free(dependent_packages);
+        if (ret == -1)
+        {
+            perror("system");
+            return 1;
+        }
+        return WEXITSTATUS(ret);
     }
-
-    return dependencies;
-}
-
-/**
- * Removes a package and its dependencies from the system.
- *
- * @param name The name of the package to be removed.
- * @return 0 if the package and its dependencies were successfully removed, 1 otherwise.
- */
-int remove_one_package(const char *name)
-{
-    char command_pactree[2 * PATH_MAX + strlen(name)];
-    snprintf(command_pactree, sizeof(command_pactree), "%s --unique %s", pactree_PATH, name);
-
-    char *pactree_output = read_pactree_output(command_pactree);
-    if (pactree_output == NULL)
+    else
     {
-        return 1;
+        free(dependent_packages);
+        snprintf(command, sizeof(command), "pacman -Rns %s", package);
+        if (system(command) != 0)
+        {
+            perror("system");
+            return 1;
+        }
+        return 0;
     }
-
-    char *dependency = extract_dependencies(pactree_output);
-    free(pactree_output);
-    if (dependency == NULL)
-    {
-        return 1;
-    }
-
-    printf("Dependency packages: %s\n", dependency);
-
-    snprintf(command_pactree, sizeof(command_pactree), "%s --reverse --unique %s", pactree_PATH, name);
-    char *pactree_reverse_output = read_pactree_output(command_pactree);
-    if (pactree_reverse_output == NULL)
-    {
-        free(dependency);
-        return 1;
-    }
-
-    char *reverse_dependency = extract_dependencies(pactree_reverse_output);
-    free(pactree_reverse_output);
-    if (reverse_dependency == NULL)
-    {
-        free(dependency);
-        return 1;
-    }
-
-    printf("Reverse dependency packages: %s\n", reverse_dependency);
-
-    size_t total_size = strlen(dependency) + strlen(reverse_dependency) + 1;
-    char *all_dependency = malloc(total_size);
-    if (all_dependency == NULL)
-    {
-        perror("malloc");
-        free(dependency);
-        free(reverse_dependency);
-        return 1;
-    }
-    strcpy(all_dependency, dependency);
-    strcat(all_dependency, reverse_dependency);
-
-    free(dependency);
-    free(reverse_dependency);
-
-    size_t command_size = strlen(all_dependency) + 2 * PATH_MAX;
-    char *command_pacman = malloc(command_size);
-    if (command_pacman == NULL)
-    {
-        perror("malloc");
-        free(all_dependency);
-        return 1;
-    }
-    snprintf(command_pacman, command_size, "%s -Rns %s", pacman_PATH, all_dependency);
-    if (system(command_pacman) != 0)
-    {
-        perror("system");
-        free(command_pacman);
-        free(all_dependency);
-        return 1;
-    }
-
-    free(command_pacman);
-    free(all_dependency);
-    return 0;
 }

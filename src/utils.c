@@ -76,6 +76,48 @@ int replacePath(char *path, char *fileName, char *realName)
 // ###############################################################
 // ###############################################################
 // ###############################################################
+char *concatenate_arguments(int argc, char *argv[])
+{
+    if (argc < 3)
+    {
+        return NULL; // Not enough arguments to concatenate
+    }
+
+    // Calculate the total length needed for the final string
+    size_t total_length = 0;
+    for (int i = 2; i < argc; ++i)
+    {
+        total_length += strlen(argv[i]);
+        if (i < argc - 1)
+        {
+            total_length += 1; // Space between words
+        }
+    }
+
+    // Allocate memory for the final string
+    char *result = (char *)malloc(total_length + 1); // +1 for the null terminator
+    if (result == NULL)
+    {
+        return NULL; // Memory allocation failed
+    }
+
+    // Copy and concatenate the arguments into the result
+    result[0] = '\0'; // Initialize the result string
+    for (int i = 2; i < argc; ++i)
+    {
+        strcat(result, argv[i]);
+        if (i < argc - 1)
+        {
+            strcat(result, " ");
+        }
+    }
+
+    return result;
+}
+// ###############################################################
+// ###############################################################
+// ###############################################################
+// ###############################################################
 
 /**
  * Checks if a file exists at the specified path.

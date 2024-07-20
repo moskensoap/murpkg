@@ -8,6 +8,10 @@ int initialize_murpkgPath_and_murpkgfileName();
 
 int replaceBinary(char *path, char *fileName, char *realName);
 int replacePath(char *path, char *fileName, char *realName);
+
+
+// ###############################################################
+char *concatenate_arguments(int argc, char *argv[]);
 // ###############################################################
 
 int file_exists(const char *path);

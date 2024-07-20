@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
         return 0;
     }
     // ######################################init################################################
-    if(init_repo() != 0)
+    if (init_repo() != 0)
     {
         return 1;
     }
@@ -233,13 +233,26 @@ int main(int argc, char *argv[])
     // ######################################remove################################################
     if (strcmp(argv[1], "remove") == 0)
     {
-        if (argc != 3)
+        if (argc == 3)
         {
-            info_help_remove();
+            return remove_package(argv[2]);
+        }
+        if (argc > 3)
+        {
+            char *combined_argv = concatenate_arguments(argc, argv);
+            if (combined_argv == NULL)
+            {
+                printf("Error: concatenate_arguments\n");
+                return 1;
+            }
+            if (remove_package(combined_argv) != 0)
+            {
+                free(combined_argv);
+                return 1;
+            }
+            free(combined_argv);
             return 0;
         }
-
-        return remove_one_package(argv[2]);
     }
     // ######################################autoremove################################################
     if (strcmp(argv[1], "autoremove") == 0)

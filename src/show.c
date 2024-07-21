@@ -18,11 +18,16 @@ int show_one_package(const char *name)
 
 int show_packages(int argc, char *argv[])
 {
+    if (argc < 3)
+    {
+        printf("Error: show: missing operand\n");
+        return 1;
+    }
     if (argc == 3)
     {
         return show_one_package(argv[2]);
     }
-    else
+    if (argc > 3)
     {
         for (int i = 2; i < argc; i++)
         {

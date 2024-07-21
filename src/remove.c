@@ -116,3 +116,32 @@ int remove_package(const char *package)
         return 0;
     }
 }
+
+int remove_packages(int argc, char *argv[])
+{
+    if (argc < 3)
+    {
+        printf("Error: remove: missing operand\n");
+        return 1;
+    }
+    if (argc == 3)
+    {
+        return remove_package(argv[2]);
+    }
+    if (argc > 3)
+    {
+        char *combined_argv = concatenate_arguments(argc, argv);
+        if (combined_argv == NULL)
+        {
+            printf("Error: concatenate_arguments\n");
+            return 1;
+        }
+        if (remove_package(combined_argv) != 0)
+        {
+            free(combined_argv);
+            return 1;
+        }
+        free(combined_argv);
+        return 0;
+    }
+}

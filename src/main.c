@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
         info_help();
         return 0;
     }
-    // ######################################init################################################
+    // ######################################init_repo################################################
     if (init_repo() != 0)
     {
         return 1;
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 
             return list_name();
         }
-        info_help();
+        info_help_list();
         return 0;
     }
     // ######################################search################################################
@@ -217,42 +217,19 @@ int main(int argc, char *argv[])
             info_help_show();
             return 0;
         }
-        if (argc == 3)
-        {
-            return show_one_package(argv[2]);
-        }
-        if (argc > 3)
-        {
-            return show_packages(argc, argv);
-        }
-        info_help();
-        return 0;
+        return show_packages(argc, argv);
     }
     // ######################################install################################################
     // ######################################upgrade################################################
     // ######################################remove################################################
     if (strcmp(argv[1], "remove") == 0)
     {
-        if (argc == 3)
+        if (argc == 2)
         {
-            return remove_package(argv[2]);
-        }
-        if (argc > 3)
-        {
-            char *combined_argv = concatenate_arguments(argc, argv);
-            if (combined_argv == NULL)
-            {
-                printf("Error: concatenate_arguments\n");
-                return 1;
-            }
-            if (remove_package(combined_argv) != 0)
-            {
-                free(combined_argv);
-                return 1;
-            }
-            free(combined_argv);
+            info_help_remove();
             return 0;
         }
+        return remove_packages(argc, argv);
     }
     // ######################################autoremove################################################
     if (strcmp(argv[1], "autoremove") == 0)

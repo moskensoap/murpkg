@@ -144,4 +144,5 @@ int remove_packages(int argc, char *argv[])
         free(combined_argv);
         return 0;
     }
+    return 0;
 }

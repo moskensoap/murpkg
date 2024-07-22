@@ -4,13 +4,13 @@
 // const char *REPO_FILE = "/home/.mur/murpkg/repo.txt";
 // const char *TEMP_PATH = "/home/.mur/murpkg/.temp/";
 // const char *REPO_TEMP = "/home/.mur/murpkg/.temp/repo_temp.txt";
-// const char *STRUCT_TEMP = "/home/.mur/murpkg/.temp/struct_temp";
+// const char *PACKAGES_INFO_TEMP = "/home/.mur/murpkg/.temp/packages_info_temp";
 
 char REPO_PATH[PATH_MAX];
 char REPO_FILE[PATH_MAX];
 char TEMP_PATH[PATH_MAX];
 char REPO_TEMP[PATH_MAX];
-char STRUCT_TEMP[PATH_MAX];
+char PACKAGES_INFO_TEMP[PATH_MAX];
 
 char rm_PATH[PATH_MAX];
 char git_PATH[PATH_MAX];
@@ -78,7 +78,7 @@ int init_relative_name_Binary_and_path()
     {
         return 1;
     }
-    if (replacePath(STRUCT_TEMP, murpkgfileName, "/home/.mur/murpkg/.temp/struct_temp") != 0)
+    if (replacePath(PACKAGES_INFO_TEMP, murpkgfileName, "/home/.mur/murpkg/.temp/packages_info_temp") != 0)
     {
         return 1;
     }

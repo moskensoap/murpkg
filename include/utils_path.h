@@ -7,7 +7,7 @@ extern char REPO_PATH[PATH_MAX];
 extern char REPO_FILE[PATH_MAX];
 extern char TEMP_PATH[PATH_MAX];
 extern char REPO_TEMP[PATH_MAX];
-extern char STRUCT_TEMP[PATH_MAX];
+extern char PACKAGES_INFO_TEMP[PATH_MAX];
 
 extern char rm_PATH[PATH_MAX];
 extern char git_PATH[PATH_MAX];

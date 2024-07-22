@@ -1,4 +1,6 @@
 build/*
+test/*.bin
+test/*.exe
 .vscode/
 .idea/
 *.exe

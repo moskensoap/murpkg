@@ -348,8 +348,10 @@ int contain_underline_underline(const char *str)
 // ###############################################################
 // ###############################################################
 
-void init_package(Package *pkg)
+int init_package(Package *pkg)
 {
+    if (!pkg)
+        return -1;
     pkg->pkgname = NULL;
     pkg->pkgver = NULL;
     pkg->pkgrel = NULL;
@@ -363,35 +365,70 @@ void init_package(Package *pkg)
     pkg->flag = 0;
     pkg->depends = NULL;
     pkg->depends_count = 0;
+    return 0;
 }
 
-void init_package_list(PackageList *pkg_list)
+int init_package_list(PackageList *pkg_list)
 {
+    if (!pkg_list)
+        return -1;
     pkg_list->packages = NULL;
     pkg_list->package_count = 0;
+    return 0;
 }
 
-void add_package(PackageList *pkg_list, const char *name, const char *version, const char *rel, const char *arch, const char *mingw_arch, const char *fullname, const char *desc, const char *abs_dir, const char *install_cmds, long long int level, int flag)
+int add_package(PackageList *pkg_list, const char *name, const char *version, const char *rel, const char *arch, const char *mingw_arch, const char *fullname, const char *desc, const char *abs_dir, const char *install_cmds, long long int level, int flag)
 {
-    pkg_list->packages = realloc(pkg_list->packages, (pkg_list->package_count + 1) * sizeof(Package));
-    Package *new_pkg = &pkg_list->packages[pkg_list->package_count];
-    init_package(new_pkg);
-    new_pkg->pkgname = strdup(name);
-    new_pkg->pkgver = strdup(version);
-    new_pkg->pkgrel = strdup(rel);
-    new_pkg->arch = strdup(arch);
-    new_pkg->mingw_arch = strdup(mingw_arch);
-    new_pkg->fullname = strdup(fullname);
-    new_pkg->pkgdesc = strdup(desc);
-    new_pkg->abs_dir = strdup(abs_dir);
-    new_pkg->install_cmds = strdup(install_cmds);
-    new_pkg->level = level;
-    new_pkg->flag = flag;
+    if (!pkg_list)
+        return -1;
+
+    Package *new_packages = realloc(pkg_list->packages, (pkg_list->package_count + 1) * sizeof(Package));
+    if (!new_packages)
+        return -1;
+    pkg_list->packages = new_packages;
+
+    Package *pkg = &pkg_list->packages[pkg_list->package_count];
+    if (init_package(pkg) != 0)
+        return -1;
+
+    pkg->pkgname = strdup(name);
+    pkg->pkgver = strdup(version);
+    pkg->pkgrel = strdup(rel);
+    pkg->arch = strdup(arch);
+    pkg->mingw_arch = strdup(mingw_arch);
+    pkg->fullname = strdup(fullname);
+    pkg->pkgdesc = strdup(desc);
+    pkg->abs_dir = strdup(abs_dir);
+    pkg->install_cmds = strdup(install_cmds);
+    pkg->level = level;
+    pkg->flag = flag;
+
     pkg_list->package_count++;
+    return 0;
 }
 
-void free_package(Package *pkg)
+int add_dependency(Package *pkg, const char *dependency)
 {
+    if (!pkg)
+        return -1;
+
+    char **new_depends = realloc(pkg->depends, (pkg->depends_count + 1) * sizeof(char *));
+    if (!new_depends)
+        return -1;
+    pkg->depends = new_depends;
+
+    pkg->depends[pkg->depends_count] = strdup(dependency);
+    if (!pkg->depends[pkg->depends_count])
+        return -1;
+    pkg->depends_count++;
+    return 0;
+}
+
+int free_package(Package *pkg)
+{
+    if (!pkg)
+        return -1;
+
     free(pkg->pkgname);
     free(pkg->pkgver);
     free(pkg->pkgrel);
@@ -406,148 +443,369 @@ void free_package(Package *pkg)
         free(pkg->depends[i]);
     }
     free(pkg->depends);
+
+    return 0;
 }
 
-void free_package_list(PackageList *pkg_list)
+int free_package_list(PackageList *pkg_list)
 {
+    if (!pkg_list)
+        return -1;
+
     for (int i = 0; i < pkg_list->package_count; i++)
     {
-        free_package(&pkg_list->packages[i]);
+        if (free_package(&pkg_list->packages[i]) != 0)
+            return -1;
     }
     free(pkg_list->packages);
+    return 0;
 }
 
-void write_package_to_file(PackageList *pkg_list, const char *filename)
+int write_package_to_file(PackageList *pkg_list, const char *filename)
 {
+    if (!pkg_list || !filename)
+        return -1;
+
     FILE *file = fopen(filename, "wb");
     if (!file)
+        return -1;
+
+    if (fwrite(&pkg_list->package_count, sizeof(int), 1, file) != 1)
     {
-        perror("Failed to open file for writing");
-        return;
+        fclose(file);
+        return -1;
     }
 
-    fwrite(&pkg_list->package_count, sizeof(int), 1, file);
     for (int i = 0; i < pkg_list->package_count; i++)
     {
         Package *pkg = &pkg_list->packages[i];
+        int len;
 
-        fwrite(&pkg->level, sizeof(long long int), 1, file);
-        fwrite(&pkg->flag, sizeof(int), 1, file);
-        fwrite(&pkg->depends_count, sizeof(int), 1, file);
-
-        size_t len = strlen(pkg->pkgname) + 1;
-        fwrite(&len, sizeof(size_t), 1, file);
-        fwrite(pkg->pkgname, len, 1, file);
+        len = strlen(pkg->pkgname) + 1;
+        if (fwrite(&len, sizeof(int), 1, file) != 1 || fwrite(pkg->pkgname, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
         len = strlen(pkg->pkgver) + 1;
-        fwrite(&len, sizeof(size_t), 1, file);
-        fwrite(pkg->pkgver, len, 1, file);
+        if (fwrite(&len, sizeof(int), 1, file) != 1 || fwrite(pkg->pkgver, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
         len = strlen(pkg->pkgrel) + 1;
-        fwrite(&len, sizeof(size_t), 1, file);
-        fwrite(pkg->pkgrel, len, 1, file);
+        if (fwrite(&len, sizeof(int), 1, file) != 1 || fwrite(pkg->pkgrel, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
         len = strlen(pkg->arch) + 1;
-        fwrite(&len, sizeof(size_t), 1, file);
-        fwrite(pkg->arch, len, 1, file);
+        if (fwrite(&len, sizeof(int), 1, file) != 1 || fwrite(pkg->arch, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
         len = strlen(pkg->mingw_arch) + 1;
-        fwrite(&len, sizeof(size_t), 1, file);
-        fwrite(pkg->mingw_arch, len, 1, file);
+        if (fwrite(&len, sizeof(int), 1, file) != 1 || fwrite(pkg->mingw_arch, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
         len = strlen(pkg->fullname) + 1;
-        fwrite(&len, sizeof(size_t), 1, file);
-        fwrite(pkg->fullname, len, 1, file);
+        if (fwrite(&len, sizeof(int), 1, file) != 1 || fwrite(pkg->fullname, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
         len = strlen(pkg->pkgdesc) + 1;
-        fwrite(&len, sizeof(size_t), 1, file);
-        fwrite(pkg->pkgdesc, len, 1, file);
+        if (fwrite(&len, sizeof(int), 1, file) != 1 || fwrite(pkg->pkgdesc, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
         len = strlen(pkg->abs_dir) + 1;
-        fwrite(&len, sizeof(size_t), 1, file);
-        fwrite(pkg->abs_dir, len, 1, file);
+        if (fwrite(&len, sizeof(int), 1, file) != 1 || fwrite(pkg->abs_dir, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
         len = strlen(pkg->install_cmds) + 1;
-        fwrite(&len, sizeof(size_t), 1, file);
-        fwrite(pkg->install_cmds, len, 1, file);
+        if (fwrite(&len, sizeof(int), 1, file) != 1 || fwrite(pkg->install_cmds, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
+
+        if (fwrite(&pkg->level, sizeof(long long int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
+
+        if (fwrite(&pkg->flag, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
+
+        if (fwrite(&pkg->depends_count, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
 
         for (int j = 0; j < pkg->depends_count; j++)
         {
             len = strlen(pkg->depends[j]) + 1;
-            fwrite(&len, sizeof(size_t), 1, file);
-            fwrite(pkg->depends[j], len, 1, file);
+            if (fwrite(&len, sizeof(int), 1, file) != 1 || fwrite(pkg->depends[j], sizeof(char), len, file) != len)
+            {
+                fclose(file);
+                return -1;
+            }
         }
     }
 
     fclose(file);
+    return 0;
 }
 
-void read_package_from_file(PackageList *pkg_list, const char *filename)
+int read_package_from_file(PackageList *pkg_list, const char *filename)
 {
+    if (!pkg_list || !filename)
+        return -1;
+
     FILE *file = fopen(filename, "rb");
     if (!file)
+        return -1;
+
+    if (fread(&pkg_list->package_count, sizeof(int), 1, file) != 1)
     {
-        perror("Failed to open file for reading");
-        return;
+        fclose(file);
+        return -1;
     }
 
-    fread(&pkg_list->package_count, sizeof(int), 1, file);
     pkg_list->packages = malloc(pkg_list->package_count * sizeof(Package));
+    if (!pkg_list->packages)
+    {
+        fclose(file);
+        return -1;
+    }
 
     for (int i = 0; i < pkg_list->package_count; i++)
     {
         Package *pkg = &pkg_list->packages[i];
-        init_package(pkg);
+        if (init_package(pkg) != 0)
+            return -1;
 
-        fread(&pkg->level, sizeof(long long int), 1, file);
-        fread(&pkg->flag, sizeof(int), 1, file);
-        fread(&pkg->depends_count, sizeof(int), 1, file);
+        int len;
 
-        size_t len;
-        fread(&len, sizeof(size_t), 1, file);
+        if (fread(&len, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
         pkg->pkgname = malloc(len);
-        fread(pkg->pkgname, len, 1, file);
+        if (!pkg->pkgname)
+        {
+            fclose(file);
+            return -1;
+        }
+        if (fread(pkg->pkgname, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
-        fread(&len, sizeof(size_t), 1, file);
+        if (fread(&len, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
         pkg->pkgver = malloc(len);
-        fread(pkg->pkgver, len, 1, file);
+        if (!pkg->pkgver)
+        {
+            fclose(file);
+            return -1;
+        }
+        if (fread(pkg->pkgver, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
-        fread(&len, sizeof(size_t), 1, file);
+        if (fread(&len, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
         pkg->pkgrel = malloc(len);
-        fread(pkg->pkgrel, len, 1, file);
+        if (!pkg->pkgrel)
+        {
+            fclose(file);
+            return -1;
+        }
+        if (fread(pkg->pkgrel, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
-        fread(&len, sizeof(size_t), 1, file);
+        if (fread(&len, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
         pkg->arch = malloc(len);
-        fread(pkg->arch, len, 1, file);
+        if (!pkg->arch)
+        {
+            fclose(file);
+            return -1;
+        }
+        if (fread(pkg->arch, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
-        fread(&len, sizeof(size_t), 1, file);
+        if (fread(&len, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
         pkg->mingw_arch = malloc(len);
-        fread(pkg->mingw_arch, len, 1, file);
+        if (!pkg->mingw_arch)
+        {
+            fclose(file);
+            return -1;
+        }
+        if (fread(pkg->mingw_arch, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
-        fread(&len, sizeof(size_t), 1, file);
+        if (fread(&len, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
         pkg->fullname = malloc(len);
-        fread(pkg->fullname, len, 1, file);
+        if (!pkg->fullname)
+        {
+            fclose(file);
+            return -1;
+        }
+        if (fread(pkg->fullname, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
-        fread(&len, sizeof(size_t), 1, file);
+        if (fread(&len, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
         pkg->pkgdesc = malloc(len);
-        fread(pkg->pkgdesc, len, 1, file);
+        if (!pkg->pkgdesc)
+        {
+            fclose(file);
+            return -1;
+        }
+        if (fread(pkg->pkgdesc, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
-        fread(&len, sizeof(size_t), 1, file);
+        if (fread(&len, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
         pkg->abs_dir = malloc(len);
-        fread(pkg->abs_dir, len, 1, file);
+        if (!pkg->abs_dir)
+        {
+            fclose(file);
+            return -1;
+        }
+        if (fread(pkg->abs_dir, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
 
-        fread(&len, sizeof(size_t), 1, file);
+        if (fread(&len, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
         pkg->install_cmds = malloc(len);
-        fread(pkg->install_cmds, len, 1, file);
+        if (!pkg->install_cmds)
+        {
+            fclose(file);
+            return -1;
+        }
+        if (fread(pkg->install_cmds, sizeof(char), len, file) != len)
+        {
+            fclose(file);
+            return -1;
+        }
+
+        if (fread(&pkg->level, sizeof(long long int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
+
+        if (fread(&pkg->flag, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
+
+        if (fread(&pkg->depends_count, sizeof(int), 1, file) != 1)
+        {
+            fclose(file);
+            return -1;
+        }
 
         pkg->depends = malloc(pkg->depends_count * sizeof(char *));
+        if (!pkg->depends)
+        {
+            fclose(file);
+            return -1;
+        }
+
         for (int j = 0; j < pkg->depends_count; j++)
         {
-            fread(&len, sizeof(size_t), 1, file);
+            if (fread(&len, sizeof(int), 1, file) != 1)
+            {
+                fclose(file);
+                return -1;
+            }
             pkg->depends[j] = malloc(len);
-            fread(pkg->depends[j], len, 1, file);
+            if (!pkg->depends[j])
+            {
+                fclose(file);
+                return -1;
+            }
+            if (fread(pkg->depends[j], sizeof(char), len, file) != len)
+            {
+                fclose(file);
+                return -1;
+            }
         }
     }
 
     fclose(file);
+    return 0;
 }

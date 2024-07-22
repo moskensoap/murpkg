@@ -2,6 +2,22 @@
 
 int clean()
 {
+    // if TEMP_PATH exists, /usr/bin/rm -rf TEMP_PATH
+    if (file_exists(TEMP_PATH))
+    {
+        char command_rm[3 * PATH_MAX];
+        snprintf(command_rm, sizeof(command_rm), "%s -rf %s", rm_PATH, TEMP_PATH);
+        if (system(command_rm) != 0)
+        {
+            perror("system");
+            return 1;
+        }
+
+        printf("-----------------\n");
+        printf("TEMP directory cache cleaned\n");
+        printf("-----------------\n");
+    }
+
     // fisrt, /usr/bin/rm -rf REPO_PATH/*
     // then, for every even line in REPO_FILE store the line as url and cd REPO_PATH && /usr/bin/git clone url
     if (file_exists(REPO_FILE))
@@ -25,7 +41,7 @@ int clean()
         }
 
         printf("-----------------\n");
-        printf("Cache cleaned\n");
+        printf("Cache of the repo cleaned\n");
         printf("-----------------\n");
 
         FILE *file = fopen(REPO_FILE, "r");
@@ -71,6 +87,11 @@ int clean()
     else
     {
         printf("No %s file found\n", REPO_FILE);
+        if (init_repo() != 0)
+        {
+            return 1;
+        }
     }
+
     return 0;
 }

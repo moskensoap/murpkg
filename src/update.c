@@ -57,5 +57,11 @@ int update()
 
     free(line);
     fclose(file);
+
+    if (analyze_repo_info() != 0)
+    {
+        return -1;
+    }
+
     return 0;
 }

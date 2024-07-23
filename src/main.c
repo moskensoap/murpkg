@@ -195,6 +195,13 @@ int main(int argc, char *argv[])
         info_help_list();
         return 0;
     }
+
+    // ######################################check_PACKAGES_INFO_TEMP################################################
+    int ret = check_PACKAGES_INFO_TEMP();
+    if (ret != 0)
+    {
+        return ret;
+    }
     // ######################################search################################################
     if (strcmp(argv[1], "search") == 0)
     {

@@ -1,5 +1,5 @@
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef UTILS_H
+#define UTILS_H
 
 extern char murpkgPath[PATH_MAX];
 extern char murpkgfileName[PATH_MAX];
@@ -15,12 +15,14 @@ char *concatenate_arguments(int argc, char *argv[]);
 
 int file_exists(const char *path);
 int create_directory(const char *path);
+int create_directory_for_file(const char *path);
 int is_git_repo(const char *path);
 int url_to_reponame(const char *url, char *reponame);
 
 int init_repo();
 int check_REPO_FILE_existence_and_init();
 int check_repo_status_and_reclone_if_needed();
+int check_PACKAGES_INFO_TEMP();
 
 int contain_underline_underline(const char *str);
 

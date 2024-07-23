@@ -28,6 +28,12 @@ int repo_init()
         perror("system");
         return 1;
     }
+
+    if (analyze_repo_info() != 0)
+    {
+        return -1;
+    }
+
     return 0;
 }
 
@@ -133,6 +139,11 @@ int repo_add(char *name, char *url)
         return 1;
     }
 
+    if (analyze_repo_info() != 0)
+    {
+        return -1;
+    }
+
     return 0;
 }
 
@@ -235,6 +246,11 @@ int repo_remove(char *name)
     {
         perror("rename");
         return 1;
+    }
+
+    if (analyze_repo_info() != 0)
+    {
+        return -1;
     }
 
     return 0;

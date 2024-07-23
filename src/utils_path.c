@@ -5,12 +5,16 @@
 // const char *TEMP_PATH = "/home/.mur/murpkg/.temp/";
 // const char *REPO_TEMP = "/home/.mur/murpkg/.temp/repo_temp.txt";
 // const char *PACKAGES_INFO_TEMP = "/home/.mur/murpkg/.temp/packages_info_temp";
+// const char *PKGBUILD_INFO_TEMP = "/home/.mur/murpkg/.temp/pkgbuild_info_temp.txt";
 
 char REPO_PATH[PATH_MAX];
 char REPO_FILE[PATH_MAX];
 char TEMP_PATH[PATH_MAX];
 char REPO_TEMP[PATH_MAX];
 char PACKAGES_INFO_TEMP[PATH_MAX];
+char PKGBUILD_INFO_TEMP[PATH_MAX];
+
+char msys2_shell_dot_cmd_PATH[PATH_MAX];
 
 char rm_PATH[PATH_MAX];
 char git_PATH[PATH_MAX];
@@ -18,6 +22,10 @@ char ls_PATH[PATH_MAX];
 char pacman_PATH[PATH_MAX];
 char pactree_PATH[PATH_MAX];
 char echo_PATH[PATH_MAX];
+char find_PATH[PATH_MAX];
+char makepkg_PATH[PATH_MAX];
+char dos2unix_PATH[PATH_MAX];
+char sh_PATH[PATH_MAX];
 
 int init_git_PATH()
 {
@@ -82,6 +90,14 @@ int init_relative_name_Binary_and_path()
     {
         return 1;
     }
+    if (replacePath(PKGBUILD_INFO_TEMP, murpkgfileName, "/home/.mur/murpkg/.temp/pkgbuild_info_temp.txt") != 0)
+    {
+        return 1;
+    }
+    if (replacePath(msys2_shell_dot_cmd_PATH, murpkgfileName, "/msys2_shell.cmd") != 0)
+    {
+        return 1;
+    }
     if (replaceBinary(rm_PATH, murpkgfileName, "rm") != 0)
     {
         return 1;
@@ -103,6 +119,22 @@ int init_relative_name_Binary_and_path()
         return 1;
     }
     if (replaceBinary(echo_PATH, murpkgfileName, "echo") != 0)
+    {
+        return 1;
+    }
+    if (replaceBinary(find_PATH, murpkgfileName, "find") != 0)
+    {
+        return 1;
+    }
+    if (replaceBinary(makepkg_PATH, murpkgfileName, "makepkg") != 0)
+    {
+        return 1;
+    }
+    if (replaceBinary(dos2unix_PATH, murpkgfileName, "dos2unix") != 0)
+    {
+        return 1;
+    }
+    if (replaceBinary(sh_PATH, murpkgfileName, "sh") != 0)
     {
         return 1;
     }

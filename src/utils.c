@@ -173,6 +173,23 @@ int create_directory(const char *path)
     return 0;
 }
 
+int create_directory_for_file(const char *path)
+{
+    char *dir = strdup(path);
+    char *last_slash = strrchr(dir, '/');
+    if (last_slash != NULL)
+    {
+        *last_slash = '\0';
+        if (create_directory(dir) != 0)
+        {
+            free(dir);
+            return -1;
+        }
+    }
+    free(dir);
+    return 0;
+}
+
 /**
  * Checks if a given path is a Git repository.
  *
@@ -236,6 +253,7 @@ int init_repo()
     {
         return 1;
     }
+
     return 0;
 }
 
@@ -324,6 +342,30 @@ int check_repo_status_and_reclone_if_needed()
 
     free(line);
     fclose(file);
+
+    return 0;
+}
+
+int check_PACKAGES_INFO_TEMP()
+{
+    if (file_exists(PACKAGES_INFO_TEMP) == 0)
+    {
+        printf("packages_info_temp not exists, do you want to create? (Y/n) ");
+        char c = getchar();
+        if (c == 'Y' || c == 'y' || c == '\n')
+        {
+            int ret = analyze_repo_info();
+            if (ret != 0)
+            {
+                return ret;
+            }
+            printf("%s is created.\n\n", PACKAGES_INFO_TEMP);
+        }
+        else
+        {
+            return 1;
+        }
+    }
 
     return 0;
 }
@@ -464,6 +506,9 @@ int free_package_list(PackageList *pkg_list)
 int write_package_to_file(PackageList *pkg_list, const char *filename)
 {
     if (!pkg_list || !filename)
+        return -1;
+
+    if (create_directory_for_file(filename) != 0)
         return -1;
 
     FILE *file = fopen(filename, "wb");

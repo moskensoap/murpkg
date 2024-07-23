@@ -34,7 +34,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 
 # Install target to install the executable to /usr/bin
 install: $(TARGET)
-	install -m 0755 $(TARGET) $(DESTDIR)/usr/local/bin/
+	install -Dm 0755 $(TARGET) $(DESTDIR)/usr/local/bin/
 
 # Clean target to remove generated files
 clean:

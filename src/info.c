@@ -1,6 +1,6 @@
 #include "murpkg.h"
 
-const char *version = "0.4.0";
+const char *version = "0.4.1";
 
 void info_help()
 {
@@ -88,7 +88,7 @@ void info_help_search()
     printf("Usage:\n\n");
     printf("\tmurpkg search\n\n");
     printf("Description:\n\n");
-    printf("\tSearch for all package in the repositories.\n");
+    printf("\tSearch for all packages in the repositories.\n");
 
     printf("Usage:\n\n");
     printf("\tmurpkg search <package>\n\n");
@@ -115,6 +115,11 @@ void info_help_install()
     printf("\tmurpkg install <package>\n\n");
     printf("Description:\n\n");
     printf("\tInstall a package.\n");
+
+    printf("Usage:\n\n");
+    printf("\tmurpkg install <package1> <package2> <package3> ...\n\n");
+    printf("Description:\n\n");
+    printf("\tInstall multiple packages.\n");
 }
 
 void info_help_upgrade()

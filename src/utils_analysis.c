@@ -672,9 +672,10 @@ int generate_package_level(PackageList *pkg_list)
         level_temp[i] = 0;
         flag_temp[i] = 0;
         pkg_list->packages[i].flag = 1;
+        // to regenerate the level of all packages, set the level of all packages to 0
+        pkg_list->packages[i].level = 0;
     }
 
-    // notice: inital level is 0 for all packages
     //"level" is a transitive order relation indicating the dependency importance of being relied on by other packages
 
     int sum = 0;

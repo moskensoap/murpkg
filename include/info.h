@@ -16,6 +16,7 @@ void info_help_list();
 void info_help_search();
 void info_help_show();
 void info_help_install();
+void info_help_reinstall();
 void info_help_upgrade();
 void info_help_remove();
 void info_help_autoremove();

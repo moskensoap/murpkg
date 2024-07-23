@@ -17,6 +17,7 @@
 #include "info.h"
 #include "install.h"
 #include "list.h"
+#include "reinstall.h"
 #include "remove.h"
 #include "repo.h"
 #include "search.h"

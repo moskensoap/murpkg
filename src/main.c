@@ -64,6 +64,11 @@ int main(int argc, char *argv[])
             info_help_install();
             return 0;
         }
+        if (strcmp(argv[2], "reinstall") == 0)
+        {
+            info_help_reinstall();
+            return 0;
+        }
         if (strcmp(argv[2], "upgrade") == 0)
         {
             info_help_upgrade();
@@ -235,6 +240,16 @@ int main(int argc, char *argv[])
             return 0;
         }
         return install_packages(argc, argv);
+    }
+    // ######################################reinstall################################################
+    if (strcmp(argv[1], "reinstall") == 0)
+    {
+        if (argc == 2)
+        {
+            info_help_reinstall();
+            return 0;
+        }
+        return reinstall_packages(argc, argv);
     }
     // ######################################upgrade################################################
     if (strcmp(argv[1], "upgrade") == 0)

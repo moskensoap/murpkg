@@ -1,6 +1,6 @@
 #include "murpkg.h"
 
-const char *version = "0.4.3";
+const char *version = "0.5.0";
 
 void info_help()
 {
@@ -16,6 +16,7 @@ void info_help()
     printf("\tsearch\t\tSearch for a package in the repositories.\n");
     printf("\tshow\t\tShow detailed information about a package.\n");
     printf("\tinstall\t\tInstall a package.\n");
+    printf("\treinstall\t\tReinstall a package.\n");
     printf("\tupgrade\t\tUpgrade all installed packages to the latest version.\n");
     printf("\tremove\t\tRemove a package.\n");
     printf("\tautoremove\tAutomatically remove unneeded packages.\n");
@@ -120,6 +121,19 @@ void info_help_install()
     printf("\tmurpkg install <package1> <package2> <package3> ...\n\n");
     printf("Description:\n\n");
     printf("\tInstall multiple packages.\n");
+}
+
+void info_help_reinstall()
+{
+    printf("Usage:\n\n");
+    printf("\tmurpkg reinstall <package>\n\n");
+    printf("Description:\n\n");
+    printf("\tReinstall a package.\n");
+
+    printf("Usage:\n\n");
+    printf("\tmurpkg reinstall <package1> <package2> <package3> ...\n\n");
+    printf("Description:\n\n");
+    printf("\tReinstall multiple packages.\n");
 }
 
 void info_help_upgrade()

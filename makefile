@@ -32,6 +32,10 @@ $(TARGET): $(OBJS)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+# Install target to install the executable to /usr/bin
+install: $(TARGET)
+	install -m 0755 $(TARGET) $(DESTDIR)/usr/local/bin/
+
 # Clean target to remove generated files
 clean:
 	rm -rf $(BUILD_DIR)/* $(TARGET)

@@ -9,4 +9,8 @@ int get_repo_info(const char *path, PackageList *pkg_list);
 
 int get_PKGBUILD_info(const char *path, FILE *file, PackageList *pkg_list);
 
+int get_package_installed_flage(PackageList *pkg_list);
+
+int generate_package_level(PackageList *pkg_list);
+
 #endif

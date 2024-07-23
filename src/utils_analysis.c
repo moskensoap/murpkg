@@ -61,6 +61,30 @@ int analyze_repo_info()
     free(line);
     fclose(file);
 
+    int ret = generate_package_level(&pkg_list);
+    if (ret != 0)
+    {
+        perror("generate_package_level");
+        if (free_package_list(&pkg_list) != 0)
+        {
+            printf("free_package_list failed\n");
+            return -1;
+        }
+        return ret;
+    }
+
+    ret = get_package_installed_flage(&pkg_list);
+    if (ret != 0)
+    {
+        perror("get_package_installed_flage");
+        if (free_package_list(&pkg_list) != 0)
+        {
+            printf("free_package_list failed\n");
+            return -1;
+        }
+        return ret;
+    }
+
     if (write_package_to_file(&pkg_list, PACKAGES_INFO_TEMP) != 0)
     {
         printf("write_package_to_file failed\n");
@@ -303,7 +327,7 @@ int get_PKGBUILD_info(const char *path, FILE *file, PackageList *pkg_list)
     // and then call add_package(PackageList *pkg_list, const char *name, const char *version, const char *rel, const char *arch, const char *mingw_arch, const char *fullname, const char *desc, const char *abs_dir, const char *install_cmds, long long int level, int flag) to add the package information to pkg_list
 
     // for each value of depends and makedepends store it as dependency and call add_dependency(Package *pkg, const char *dependency) to add it to the package
-    char printsrcinfo[7 * PATH_MAX];
+    char printsrcinfo[8 * PATH_MAX];
     char name[PATH_MAX], version[PATH_MAX], rel[PATH_MAX], arch[PATH_MAX], mingw_arch[PATH_MAX], fullname[4 * PATH_MAX], desc[PATH_MAX], abs_dir[PATH_MAX], install_cmds[15 * PATH_MAX], dependency[PATH_MAX];
     long long int level = 0;
     int flag = 0;
@@ -319,7 +343,7 @@ int get_PKGBUILD_info(const char *path, FILE *file, PackageList *pkg_list)
     if (mingw_arch_index == 0)
     {
 
-        snprintf(printsrcinfo, sizeof(printsrcinfo), "cd %s && %s PKGBUILD > /dev/null 2>&1 && %s --printsrcinfo > %s", path, dos2unix_PATH, makepkg_PATH, PKGBUILD_INFO_TEMP);
+        snprintf(printsrcinfo, sizeof(printsrcinfo), "cd %s && %s . -maxdepth 1 -type f -exec %s {} + > /dev/null 2>&1 && %s --printsrcinfo > %s", path, find_PATH, dos2unix_PATH, makepkg_PATH, PKGBUILD_INFO_TEMP);
         if (system(printsrcinfo) != 0)
         {
             return 1;
@@ -396,10 +420,10 @@ int get_PKGBUILD_info(const char *path, FILE *file, PackageList *pkg_list)
                 }
             }
             snprintf(fullname, sizeof(fullname), "%s %s-%s", name, version, rel);
-            snprintf(install_cmds, sizeof(install_cmds), "cd %s && (%s -U %s-%s-%s-%s.pkg.tar.zst || (%s -defterm -here -no-start -%s -c \"%s --cleanbuild --syncdeps --force --noconfirm\" && %s -U %s-%s-%s-%s.pkg.tar.zst))", abs_dir, pacman_PATH, name, version, rel, arch, msys2_shell_dot_cmd_PATH, mingw_arch, makepkg_PATH, pacman_PATH, name, version, rel, arch);
+            snprintf(install_cmds, sizeof(install_cmds), "cd %s && (%s -U %s-%s-%s-%s.pkg.tar.zst --noconfirm || (%s -defterm -here -no-start -%s -c \"%s --cleanbuild --syncdeps --force --noconfirm\" && %s -U %s-%s-%s-%s.pkg.tar.zst --noconfirm))", abs_dir, pacman_PATH, name, version, rel, arch, msys2_shell_dot_cmd_PATH, mingw_arch, makepkg_PATH, pacman_PATH, name, version, rel, arch);
 
             // printf all the information of the package
-            printf("name: %s; version: %s; rel: %s; arch: %s; mingw_arch: %s; fullname: %s; desc: %s; abs_dir: %s; install_cmds: %s; level: %lld; flag: %d\n", name, version, rel, arch, mingw_arch, fullname, desc, abs_dir, install_cmds, level, flag);
+            // printf("name: %s; version: %s; rel: %s; arch: %s; mingw_arch: %s; fullname: %s; desc: %s; abs_dir: %s; install_cmds: %s; level: %lld; flag: %d\n", name, version, rel, arch, mingw_arch, fullname, desc, abs_dir, install_cmds, level, flag);
 
             if (add_package(pkg_list, name, version, rel, arch, mingw_arch, fullname, desc, abs_dir, install_cmds, level, flag) != 0)
             {
@@ -454,7 +478,7 @@ int get_PKGBUILD_info(const char *path, FILE *file, PackageList *pkg_list)
     {
         for (int ii = 0; ii < mingw_arch_index; ii++)
         {
-            snprintf(printsrcinfo, sizeof(printsrcinfo), "MINGW_ARCH=%s %s -c 'cd %s && %s PKGBUILD > /dev/null 2>&1 && %s-mingw --printsrcinfo > %s'", mingw_arch_detect[ii], sh_PATH, path, dos2unix_PATH, makepkg_PATH, PKGBUILD_INFO_TEMP);
+            snprintf(printsrcinfo, sizeof(printsrcinfo), "MINGW_ARCH=%s %s -c 'cd %s && %s . -maxdepth 1 -type f -exec %s {} + > /dev/null 2>&1 && %s-mingw --printsrcinfo > %s'", mingw_arch_detect[ii], sh_PATH, path, find_PATH, dos2unix_PATH, makepkg_PATH, PKGBUILD_INFO_TEMP);
             if (system(printsrcinfo) != 0)
             {
                 return 1;
@@ -523,10 +547,10 @@ int get_PKGBUILD_info(const char *path, FILE *file, PackageList *pkg_list)
                     }
                 }
                 snprintf(fullname, sizeof(fullname), "%s %s-%s", name, version, rel);
-                snprintf(install_cmds, sizeof(install_cmds), "cd %s && (%s -U %s-%s-%s-%s.pkg.tar.zst || (%s -defterm -here -no-start -%s -c \"%s-mingw --cleanbuild --syncdeps --force --noconfirm\" && %s -U %s-%s-%s-%s.pkg.tar.zst))", abs_dir, pacman_PATH, name, version, rel, arch, msys2_shell_dot_cmd_PATH, mingw_arch, makepkg_PATH, pacman_PATH, name, version, rel, arch);
+                snprintf(install_cmds, sizeof(install_cmds), "cd %s && (%s -U %s-%s-%s-%s.pkg.tar.zst --noconfirm || (%s -defterm -here -no-start -%s -c \"%s-mingw --cleanbuild --syncdeps --force --noconfirm\" && %s -U %s-%s-%s-%s.pkg.tar.zst --noconfirm))", abs_dir, pacman_PATH, name, version, rel, arch, msys2_shell_dot_cmd_PATH, mingw_arch, makepkg_PATH, pacman_PATH, name, version, rel, arch);
 
                 // printf all the information of the package
-                printf("name: %s; version: %s; rel: %s; arch: %s; mingw_arch: %s; fullname: %s; desc: %s; abs_dir: %s; install_cmds: %s; level: %lld; flag: %d\n", name, version, rel, arch, mingw_arch, fullname, desc, abs_dir, install_cmds, level, flag);
+                // printf("name: %s; version: %s; rel: %s; arch: %s; mingw_arch: %s; fullname: %s; desc: %s; abs_dir: %s; install_cmds: %s; level: %lld; flag: %d\n", name, version, rel, arch, mingw_arch, fullname, desc, abs_dir, install_cmds, level, flag);
 
                 if (add_package(pkg_list, name, version, rel, arch, mingw_arch, fullname, desc, abs_dir, install_cmds, level, flag) != 0)
                 {
@@ -579,5 +603,123 @@ int get_PKGBUILD_info(const char *path, FILE *file, PackageList *pkg_list)
     }
 
     free(line);
+    return 0;
+}
+
+// ##########################################################################################################################
+// ##########################################################################################################################
+// ##########################################################################################################################
+// ##########################################################################################################################
+int get_package_installed_flage(PackageList *pkg_list)
+{
+    char command[2 * PATH_MAX];
+    snprintf(command, sizeof(command), "%s -Qmq", pacman_PATH);
+    FILE *fp = popen(command, "r");
+    if (fp == NULL)
+    {
+        perror("popen");
+        return 1;
+    }
+
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    char name[PATH_MAX];
+
+    while ((read = getline(&line, &len, fp)) != -1)
+    {
+        if (line[read - 1] == '\n')
+        {
+            line[read - 1] = '\0';
+        }
+
+        strcpy(name, line);
+
+        for (int i = 0; i < pkg_list->package_count; i++)
+        {
+            if (strcmp(pkg_list->packages[i].pkgname, name) == 0)
+            {
+                pkg_list->packages[i].flag = 1;
+            }
+        }
+    }
+
+    free(line);
+    pclose(fp);
+    return 0;
+}
+
+int generate_package_level(PackageList *pkg_list)
+{
+    // malloc long long int level_temp[package_count] with initial value 0
+    // malloc int flag_temp[package_count] with initial value 0
+    // set pkg_list->packages[i].flag=1 for all
+    long long int *level_temp = (long long int *)malloc(pkg_list->package_count * sizeof(long long int));
+    if (level_temp == NULL)
+    {
+        perror("malloc");
+        return 1;
+    }
+    int *flag_temp = (int *)malloc(pkg_list->package_count * sizeof(int));
+    if (flag_temp == NULL)
+    {
+        perror("malloc");
+        free(level_temp);
+        return 1;
+    }
+    for (int i = 0; i < pkg_list->package_count; i++)
+    {
+        level_temp[i] = 0;
+        flag_temp[i] = 0;
+        pkg_list->packages[i].flag = 1;
+    }
+
+    // notice: inital level is 0 for all packages
+    //"level" is a transitive order relation indicating the dependency importance of being relied on by other packages
+
+    int sum = 0;
+    do
+    {
+        sum = 0;
+        for (int i = 0; i < pkg_list->package_count; i++)
+        {
+            flag_temp[i] = 0;
+            sum += pkg_list->packages[i].flag;
+        }
+
+        for (int i = 0; i < pkg_list->package_count; i++)
+        {
+            if (pkg_list->packages[i].flag != 0)
+            {
+                for (int j = 0; j < pkg_list->packages[i].depends_count; j++)
+                {
+                    for (int k = 0; k < pkg_list->package_count; k++)
+                    {
+                        if (strcmp(pkg_list->packages[k].pkgname, pkg_list->packages[i].depends[j]) == 0)
+                        {
+                            flag_temp[k] = 1;
+                            level_temp[k] += pkg_list->packages[i].level + 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < pkg_list->package_count; i++)
+        {
+            pkg_list->packages[i].flag = flag_temp[i];
+            pkg_list->packages[i].level = level_temp[i];
+        }
+
+    } while (sum != 0);
+
+    // reset flag to 0 for all packages
+    for (int i = 0; i < pkg_list->package_count; i++)
+    {
+        pkg_list->packages[i].flag = 0;
+    }
+
+    free(level_temp);
+    free(flag_temp);
     return 0;
 }

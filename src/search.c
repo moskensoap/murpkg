@@ -86,7 +86,7 @@ int search_one(const char *name)
             int package_count;
             } PackageList;
             */
-            printf("\033[1;31mExplicit package info:\n\033[0m");
+            printf("\n\033[1;31mExplicit package info:\n\033[0m");
             // printf pkgname: $pkgname\n pkgver: $pkgver\n and so on
             printf("pkgname: %s\npkgver: %s\npkgrel: %s\narch: %s\nmingw_arch: %s\nfullname: %s\npkgdesc: %s\nabs_dir: %s\ninstall_cmds: %s\nlevel: %lld\nflag: %d\n",
                    read_pkg_list.packages[i].pkgname,

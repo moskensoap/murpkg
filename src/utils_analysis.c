@@ -73,10 +73,10 @@ int analyze_repo_info()
         return ret;
     }
 
-    ret = get_package_installed_flage(&pkg_list);
+    ret = get_package_installed_flag(&pkg_list);
     if (ret != 0)
     {
-        perror("get_package_installed_flage");
+        perror("get_package_installed_flag");
         if (free_package_list(&pkg_list) != 0)
         {
             printf("free_package_list failed\n");
@@ -610,7 +610,7 @@ int get_PKGBUILD_info(const char *path, FILE *file, PackageList *pkg_list)
 // ##########################################################################################################################
 // ##########################################################################################################################
 // ##########################################################################################################################
-int get_package_installed_flage(PackageList *pkg_list)
+int get_package_installed_flag(PackageList *pkg_list)
 {
     char command[2 * PATH_MAX];
     snprintf(command, sizeof(command), "%s -Qmq", pacman_PATH);
@@ -619,6 +619,12 @@ int get_package_installed_flage(PackageList *pkg_list)
     {
         perror("popen");
         return 1;
+    }
+
+    // set initial value of flag to 0 for all packages
+    for (int i = 0; i < pkg_list->package_count; i++)
+    {
+        pkg_list->packages[i].flag = 0;
     }
 
     char *line = NULL;
@@ -672,7 +678,7 @@ int generate_package_level(PackageList *pkg_list)
         level_temp[i] = 0;
         flag_temp[i] = 0;
         pkg_list->packages[i].flag = 1;
-        // to regenerate the level of all packages, set the level of all packages to 0
+        // set the level of all packages to 0
         pkg_list->packages[i].level = 0;
     }
 
@@ -723,4 +729,40 @@ int generate_package_level(PackageList *pkg_list)
     free(level_temp);
     free(flag_temp);
     return 0;
+}
+
+int renew_package_installed_flag()
+{
+   PackageList read_pkg_list;
+    if (init_package_list(&read_pkg_list) != 0)
+    {
+        printf("init_package_list failed\n");
+        return -1;
+    }
+    if (read_package_from_file(&read_pkg_list, PACKAGES_INFO_TEMP) != 0)
+    {
+        printf("read_package_from_file failed\n");
+        return -1;
+    }
+
+    if (get_package_installed_flag(&read_pkg_list) != 0)
+    {
+        printf("get_package_installed_flag failed\n");
+        return -1;
+    }
+
+    if (write_package_to_file(&read_pkg_list, PACKAGES_INFO_TEMP) != 0)
+    {
+        printf("write_package_to_file failed\n");
+        return -1;
+    }
+
+    if (free_package_list(&read_pkg_list) != 0)
+    {
+        printf("free_package_list failed\n");
+        return -1;
+    }
+
+    return 0;
+
 }

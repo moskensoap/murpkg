@@ -227,7 +227,25 @@ int main(int argc, char *argv[])
         return show_packages(argc, argv);
     }
     // ######################################install################################################
+    if (strcmp(argv[1], "install") == 0)
+    {
+        if (argc == 2)
+        {
+            info_help_install();
+            return 0;
+        }
+        return install_packages(argc, argv);
+    }
     // ######################################upgrade################################################
+    if (strcmp(argv[1], "upgrade") == 0)
+    {
+        if (argc != 2)
+        {
+            info_help_upgrade();
+            return 0;
+        }
+        return upgrade_packages();
+    }
     // ######################################remove################################################
     if (strcmp(argv[1], "remove") == 0)
     {

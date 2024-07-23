@@ -97,12 +97,11 @@ int remove_package(const char *package)
         int ret = system(newcommand);
         free(newcommand);
         free(dependent_packages);
-        if (ret == -1)
+        if (ret != 0)
         {
             perror("system");
             return 1;
         }
-        return WEXITSTATUS(ret);
     }
     else
     {
@@ -113,8 +112,14 @@ int remove_package(const char *package)
             perror("system");
             return 1;
         }
-        return 0;
     }
+
+    if (renew_package_installed_flag() != 0)
+    {
+        return 1;
+    }
+
+    return 0;
 }
 
 int remove_packages(int argc, char *argv[])

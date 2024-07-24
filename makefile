@@ -35,6 +35,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 # Install target to install the executable to /usr/bin
 install: $(TARGET)
 	install -Dm 0755 $(TARGET) $(DESTDIR)/usr/local/bin/$(TARGET)
+	install -Dm 0755 printsrcinfo $(DESTDIR)/usr/local/bin/printsrcinfo
 
 # Clean target to remove generated files
 clean:

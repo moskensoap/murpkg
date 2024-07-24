@@ -15,6 +15,7 @@ char PACKAGES_INFO_TEMP[PATH_MAX];
 char PKGBUILD_INFO_TEMP[PATH_MAX];
 
 char msys2_shell_dot_cmd_PATH[PATH_MAX];
+char printsrcinfo_PATH[PATH_MAX];
 
 char rm_PATH[PATH_MAX];
 char git_PATH[PATH_MAX];
@@ -25,7 +26,6 @@ char echo_PATH[PATH_MAX];
 char find_PATH[PATH_MAX];
 char makepkg_PATH[PATH_MAX];
 char dos2unix_PATH[PATH_MAX];
-char sh_PATH[PATH_MAX];
 
 int init_git_PATH()
 {
@@ -98,6 +98,10 @@ int init_relative_name_Binary_and_path()
     {
         return 1;
     }
+    if (replacePath(printsrcinfo_PATH, murpkgfileName, "/usr/local/bin/printsrcinfo") != 0)
+    {
+        return 1;
+    }
     if (replaceBinary(rm_PATH, murpkgfileName, "rm") != 0)
     {
         return 1;
@@ -131,10 +135,6 @@ int init_relative_name_Binary_and_path()
         return 1;
     }
     if (replaceBinary(dos2unix_PATH, murpkgfileName, "dos2unix") != 0)
-    {
-        return 1;
-    }
-    if (replaceBinary(sh_PATH, murpkgfileName, "sh") != 0)
     {
         return 1;
     }

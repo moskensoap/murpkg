@@ -343,7 +343,7 @@ int get_PKGBUILD_info(const char *path, FILE *file, PackageList *pkg_list)
     if (mingw_arch_index == 0)
     {
 
-        snprintf(printsrcinfo, sizeof(printsrcinfo), "cd %s && %s . -maxdepth 1 -type f -exec %s {} + > /dev/null 2>&1 && %s --printsrcinfo > %s", path, find_PATH, dos2unix_PATH, makepkg_PATH, PKGBUILD_INFO_TEMP);
+        snprintf(printsrcinfo, sizeof(printsrcinfo), "cd %s && %s . -maxdepth 1 -type f -exec %s {} + > /dev/null 2>&1 && %s ./PKGBUILD > %s", path, find_PATH, dos2unix_PATH, printsrcinfo_PATH, PKGBUILD_INFO_TEMP);
         if (system(printsrcinfo) != 0)
         {
             return 1;
@@ -478,7 +478,7 @@ int get_PKGBUILD_info(const char *path, FILE *file, PackageList *pkg_list)
     {
         for (int ii = 0; ii < mingw_arch_index; ii++)
         {
-            snprintf(printsrcinfo, sizeof(printsrcinfo), "MINGW_ARCH=%s %s -c 'cd %s && %s . -maxdepth 1 -type f -exec %s {} + > /dev/null 2>&1 && %s-mingw --printsrcinfo > %s'", mingw_arch_detect[ii], sh_PATH, path, find_PATH, dos2unix_PATH, makepkg_PATH, PKGBUILD_INFO_TEMP);
+            snprintf(printsrcinfo, sizeof(printsrcinfo), "%s -defterm -here -no-start -%s -c 'cd %s && %s . -maxdepth 1 -type f -exec %s {} + > /dev/null 2>&1 && %s ./PKGBUILD > %s'", msys2_shell_dot_cmd_PATH, mingw_arch_detect[ii], path, find_PATH, dos2unix_PATH, printsrcinfo_PATH, PKGBUILD_INFO_TEMP);
             if (system(printsrcinfo) != 0)
             {
                 return 1;
@@ -733,7 +733,7 @@ int generate_package_level(PackageList *pkg_list)
 
 int renew_package_installed_flag()
 {
-   PackageList read_pkg_list;
+    PackageList read_pkg_list;
     if (init_package_list(&read_pkg_list) != 0)
     {
         printf("init_package_list failed\n");
@@ -764,5 +764,4 @@ int renew_package_installed_flag()
     }
 
     return 0;
-
 }

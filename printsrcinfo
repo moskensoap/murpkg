@@ -1,0 +1,115 @@
+#!/bin/bash
+
+# Ensure the PKGBUILD file exists
+if [ ! -f "$1" ]; then
+    echo "PKGBUILD file not found!"
+    exit 1
+fi
+
+# Source the PKGBUILD to get the global variables
+source "$1"
+
+# Function to print package information
+print_pkg_info() {
+    local pkgname="$1"
+    local pkgdesc="${2:-$pkgdesc}"
+    local pkgver="${3:-$pkgver}"
+    local pkgrel="${4:-$pkgrel}"
+    local arch=("${!5}")
+    local makedepends=("${!6}")
+    local depends=("${!7}")
+
+    echo "pkgname = $pkgname"
+    echo "        pkgdesc = $pkgdesc"
+    echo "        pkgver = $pkgver"
+    echo "        pkgrel = $pkgrel"
+
+    for ar in "${arch[@]}"; do
+        echo "        arch = $ar"
+    done
+
+    for dep in "${makedepends[@]}"; do
+        echo "        makedepends = $dep"
+    done
+
+    for dep in "${depends[@]}"; do
+        echo "        depends = $dep"
+    done
+    echo
+}
+
+# Print base package info
+echo "pkgbase = ${pkgname[0]}"
+echo "        pkgdesc = $pkgdesc"
+echo "        pkgver = $pkgver"
+echo "        pkgrel = $pkgrel"
+for ar in "${arch[@]}"; do
+    echo "        arch = $ar"
+done
+for dep in "${makedepends[@]}"; do
+    echo "        makedepends = $dep"
+done
+for dep in "${depends[@]}"; do
+    echo "        depends = $dep"
+done
+echo
+
+# Function to extract information from package functions
+extract_package_info() {
+    local func="$1"
+    local pkgname="${func#package_}"
+
+    local pkgdesc="$pkgdesc"
+    local pkgver="$pkgver"
+    local pkgrel="$pkgrel"
+    local arch=()
+    local makedepends=()
+    local depends=()
+
+    while read -r line; do
+        case "$line" in
+            pkgdesc=*)
+                pkgdesc="${line#pkgdesc=}"
+                pkgdesc="${pkgdesc//;/}"
+                pkgdesc=$(echo "$pkgdesc" | sed -e 's/^["'\'']//;s/["'\'']$//')
+                ;;
+            pkgver=*)
+                pkgver="${line#pkgver=}"
+                pkgver="${pkgver//;/}"
+                ;;
+            pkgrel=*)
+                pkgrel="${line#pkgrel=}"
+                pkgrel="${pkgrel//;/}"
+                ;;
+            arch=*)
+                arch_string="${line#arch=}"
+                arch_string="${arch_string//[\(\)\'\"]}"
+                arch_string="${arch_string//;/}"
+                IFS=', ' read -r -a arch <<< "$arch_string"
+                ;;
+            makedepends=*)
+                makedepends_string="${line#makedepends=}"
+                makedepends_string="${makedepends_string//[\(\)\'\"]}"
+                makedepends_string="${makedepends_string//;/}"
+                IFS=', ' read -r -a makedepends <<< "$makedepends_string"
+                ;;
+            depends=*)
+                # Remove quotes and parentheses from the depends array string
+                depends_string="${line#depends=}"
+                depends_string="${depends_string//[\(\)\'\"]}"
+                depends_string="${depends_string//;/}"
+                IFS=', ' read -r -a depends <<< "$depends_string"
+                ;;
+        esac
+    done < <(declare -f "$func" | sed '1d;$d')
+
+    print_pkg_info "$pkgname" "$pkgdesc" "$pkgver" "$pkgrel" arch[@] makedepends[@] depends[@]
+}
+
+# Extract and print package-specific info
+for func in $(declare -F | awk '{print $3}' | grep '^package_' || echo 'package'); do
+    if [ "$func" == "package" ]; then
+        func="$pkgname"
+    fi
+    extract_package_info "$func"
+done

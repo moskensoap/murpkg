@@ -4,6 +4,12 @@
 
 Its mission is to offer an alternative package management approach on Windows beyond Chocolatey and Scoop.
 
+`murpkg` can also manage packages from other GitHub repositories. To add such repositories, the PKGBUILD files in those repositories must have `pkgname` values containing `__`. Use the `repo add` command to include these repositories:
+
+```
+murpkg repo add <reponame> <github-web-URL.git>
+```
+
 ## Installation
 
 1. Clone MUR-packages project to your computer by running:

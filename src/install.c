@@ -221,14 +221,6 @@ int install_packages(int argc, char **argv)
             free(flag_temp);
             if (free_package_list(&read_pkg_list) != 0)
             {
-                if (renew_package_installed_flag() != 0)
-                {
-                    return 1;
-                }
-                return 1;
-            }
-            if (renew_package_installed_flag() != 0)
-            {
                 return 1;
             }
             return 1;
@@ -237,15 +229,6 @@ int install_packages(int argc, char **argv)
 
     free(flag_temp);
     if (free_package_list(&read_pkg_list) != 0)
-    {
-        if (renew_package_installed_flag() != 0)
-        {
-            return 1;
-        }
-        return 1;
-    }
-
-    if (renew_package_installed_flag() != 0)
     {
         return 1;
     }

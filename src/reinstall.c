@@ -105,8 +105,6 @@ int reinstall_packages(int argc, char **argv)
         }
     } while (do_flag == 1);
 
-
-
     // flag_temp[i] is 1 means package[i] should be installed but already installed packages whos flag[i] is 1 should be skipped
 
     int install_count = 0;
@@ -171,14 +169,6 @@ int reinstall_packages(int argc, char **argv)
             free(flag_temp);
             if (free_package_list(&read_pkg_list) != 0)
             {
-                if (renew_package_installed_flag() != 0)
-                {
-                    return 1;
-                }
-                return 1;
-            }
-            if (renew_package_installed_flag() != 0)
-            {
                 return 1;
             }
             return 1;
@@ -187,15 +177,6 @@ int reinstall_packages(int argc, char **argv)
 
     free(flag_temp);
     if (free_package_list(&read_pkg_list) != 0)
-    {
-        if (renew_package_installed_flag() != 0)
-        {
-            return 1;
-        }
-        return 1;
-    }
-
-    if (renew_package_installed_flag() != 0)
     {
         return 1;
     }

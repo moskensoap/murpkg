@@ -144,11 +144,6 @@ int remove_package(const char *package)
         }
     }
 
-    if (renew_package_installed_flag() != 0)
-    {
-        return 1;
-    }
-
     return 0;
 }
 

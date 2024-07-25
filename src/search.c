@@ -2,6 +2,11 @@
 
 int search_all()
 {
+    if (renew_package_installed_flag() != 0)
+    {
+        return -1;
+    }
+
     PackageList read_pkg_list;
     if (init_package_list(&read_pkg_list) != 0)
     {
@@ -48,6 +53,11 @@ int search_all()
 
 int search_one(const char *name)
 {
+    if (renew_package_installed_flag() != 0)
+    {
+        return -1;
+    }
+
     PackageList read_pkg_list;
     if (init_package_list(&read_pkg_list) != 0)
     {

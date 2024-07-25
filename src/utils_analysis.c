@@ -73,18 +73,6 @@ int analyze_repo_info()
         return ret;
     }
 
-    ret = get_package_installed_flag(&pkg_list);
-    if (ret != 0)
-    {
-        perror("get_package_installed_flag");
-        if (free_package_list(&pkg_list) != 0)
-        {
-            printf("free_package_list failed\n");
-            return -1;
-        }
-        return ret;
-    }
-
     if (write_package_to_file(&pkg_list, PACKAGES_INFO_TEMP) != 0)
     {
         printf("write_package_to_file failed\n");

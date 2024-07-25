@@ -5,17 +5,22 @@ int clean()
     // if TEMP_PATH exists, /usr/bin/rm -rf TEMP_PATH
     if (file_exists(TEMP_PATH))
     {
-        char command_rm[3 * PATH_MAX];
-        snprintf(command_rm, sizeof(command_rm), "%s -rf %s", rm_PATH, TEMP_PATH);
-        if (system(command_rm) != 0)
+        printf("Clean up the temporary files? (Y/n) ");
+        char c = getchar();
+        if (c == 'Y' || c == 'y' || c == '\n')
         {
-            perror("system");
-            return 1;
-        }
+            char command_rm[3 * PATH_MAX];
+            snprintf(command_rm, sizeof(command_rm), "%s -rf %s", rm_PATH, TEMP_PATH);
+            if (system(command_rm) != 0)
+            {
+                perror("system");
+                return 1;
+            }
 
-        printf("-----------------\n");
-        printf("TEMP directory cache cleaned\n");
-        printf("-----------------\n");
+        printf("\n");
+        printf("\033[1;34m===>\033[1;37m Temporary files cleaned\033[0m\n");
+        printf("\n");
+        }
     }
 
     // fisrt, /usr/bin/rm -rf REPO_PATH/*
@@ -25,7 +30,7 @@ int clean()
         // printf clean the cache of the repo? (Y/n)
         // get the fisrt char of the input
         // if it is Y or y or \n then do the following else return 0
-        printf("clean the cache of the repo? (Y/n) ");
+        printf("Clean up the build cache? (Y/n) ");
         char c = getchar();
         if (c != 'Y' && c != 'y' && c != '\n')
         {
@@ -40,9 +45,9 @@ int clean()
             return 1;
         }
 
-        printf("-----------------\n");
-        printf("Cache of the repo cleaned\n");
-        printf("-----------------\n");
+        printf("\n");
+        printf("\033[1;34m===>\033[1;37m build cache cleaned\033[0m\n");
+        printf("\n");
 
         FILE *file = fopen(REPO_FILE, "r");
         if (file == NULL)
@@ -80,13 +85,12 @@ int clean()
         free(line);
         fclose(file);
 
-        printf("-----------------\n");
-        printf("repo ready\n");
-        printf("-----------------\n");
+        printf("\n");
+        printf("\033[1;34m===>\033[1;37m Repositories initialized\033[0m\n");
     }
     else
     {
-        printf("No %s file found\n", REPO_FILE);
+        printf("File not found: %s\n", REPO_FILE);
         if (init_repo() != 0)
         {
             return 1;

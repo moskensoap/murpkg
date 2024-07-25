@@ -43,9 +43,8 @@ int repo_list()
     {
         return 1;
     }
-    printf("%s contents:\n", REPO_FILE);
-    printf("name\t\turl\n");
-    printf("--------------------------------------->\n");
+    printf("\033[1;37m%s contents:\033[0m\n", REPO_FILE);
+    printf("\033[1;31mname\t\turl\033[0m\n");
     // odd lines are names, even lines are urls, even lines print begin with \t
     FILE *file = fopen(REPO_FILE, "r");
     if (file == NULL)
@@ -67,16 +66,15 @@ int repo_list()
         }
         else
         {
-            printf("\t%s", line);
+            printf("\t\t%s", line);
             odd = 1;
         }
     }
     free(line);
     fclose(file);
 
-    printf("--------------------------------------->\n\n");
-    printf("Directories in %s:\n", REPO_PATH);
-    printf("--------------------------------------->\n");
+    printf("\n\033[1;37mDirectories in %s:\033[0m\n", REPO_PATH);
+
     // cd REPO_PATH && ls -d */
     char command_cd_ls[3 * PATH_MAX];
     snprintf(command_cd_ls, sizeof(command_cd_ls), "cd %s && %s -d */", REPO_PATH, ls_PATH);
@@ -85,14 +83,14 @@ int repo_list()
         perror("system");
         return 1;
     }
-    printf("--------------------------------------->\n\n");
+
     return 0;
 }
 
 int repo_add(char *name, char *url)
 {
-    // if name comtains / or . or .. or whitespace, return 1
-    if (strchr(name, '/') != NULL || strchr(name, '.') != NULL || strchr(name, ' ') != NULL || strcmp(name, "..") == 0)
+    // if name contains / or . or whitespace, return 1
+    if (strchr(name, '/') != NULL || strchr(name, '.') != NULL || strchr(name, ' ') != NULL)
     {
         fprintf(stderr, "Error: invalid name\n");
         return 1;

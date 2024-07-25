@@ -1,6 +1,6 @@
 # murpkg
 
-[murpkg](https://github.com/moskensoap/murpkg) is an unofficial package manager for MSYS2, designed to manage PKGBUILD files in user GitHub repositories. It automates the process of cloning repositories, building packages using `makepkg`, and installing them with `pacman -U`. The default repository is [MUR-packages](https://github.com/moskensoap/MUR-packages), which contains PKGBUILD files for software not suitable for the official MSYS2 repository, primarily repackaged native Windows programs linked to the MSYS bin directory. Additionally, it provides multiple versions of Java, Python, PHP, and version management tools for controlling which version is linked to the bin directory.
+murpkg is an unofficial package manager for [MSYS2](https://www.msys2.org). It simplifies managing PKGBUILD files from user repositories on GitHub by automating the process of cloning, building, and installing packages. It uses MSYS2's `pacman` to handle the installation. The default repository is [MUR-packages](https://github.com/moskensoap/MUR-packages), which hosts PKGBUILD files for software not available in the [official MSYS2 repository](https://packages.msys2.org/queue), including repackaged native Windows programs and multiple versions of Java, Python, PHP. It also provides tools for managing different versions of these languages.
 
 Its mission is to offer an alternative package management approach on Windows beyond Chocolatey and Scoop.
 
@@ -12,33 +12,64 @@ murpkg repo add <reponame> <github-web-URL.git>
 
 ## Installation
 
-1. Clone MUR-packages project to your computer by running:
+1. Install [MSYS2](https://www.msys2.org).
+
+2. Make MSYS2 Binaries Accessible Globally (Recommended):
+
+    By default, binaries in `/opt/bin` and other MSYS2 directories are only accessible within the MSYS2 shell. To make these binaries accessible globally within Windows (e.g., from the Command Prompt or PowerShell), follow these steps to add them to your Windows PATH environment variable:  
+
+* Navigate to System Properties > Advanced System Settings > Environment Variables.  
+
+* Under "User Variables" (or "System Variables" if you want the change to apply to all users), select the "Path" variable and click "Edit".  
+
+* Append the following paths, separated by semicolons (;), to the end of the list:
+
+```
+    C:\msys64\ucrt64\bin
+    C:\msys64\mingw64\bin
+    C:\msys64\mingw32\bin
+    C:\msys64\clang64\bin
+    C:\msys64\clang32\bin
+    C:\msys64\clangarm64\bin
+    C:\msys64\usr\local\bin
+    C:\msys64\usr\bin
+    C:\msys64\bin
+    C:\msys64\opt\bin
+```
+
+* **Note**: Adjust the paths as necessary if your MSYS2 installation is located in a different directory.  
+ 
+* Click "OK" to save your changes and close the dialog boxes.  
+ 
+* Additionally, to ensure that MSYS2 can inherit the Windows PATH (e.g., to access Windows programs within MSYS2), you can set the `MSYS2_PATH_TYPE` environment variable to `inherit`.
+
+3. Clone MUR-packages project to your computer by running:
 
     ```
     git clone https://github.com/moskensoap/MUR-packages.git
     ```
 
-2. Prepare the build environment. See the [MSYS2 new package guide](https://www.msys2.org/dev/new-package/) and run:
+4. Prepare the build environment. See the [MSYS2 new package guide](https://www.msys2.org/dev/new-package/) and run:
 
     ```
     pacman -S --needed base-devel
     ```
 
-3. Enter MUR-packages/murpkg and open a MSYS shell here:
+5. Navigate to the `MUR-packages/murpkg` directory and open a MSYS shell here:
 
-    - To solve CRLF error, you may run:
+    - To address potential CRLF issues, convert line endings:
 
         ```
         dos2unix PKGBUILD
         ```
 
-    - Make package, run:
+    - Build the package:
 
         ```
         makepkg --cleanbuild --syncdeps --force --noconfirm
         ```
 
-4. To install the package, run:
+6. To install the package, run:
 
     ```
     pacman -U *.pkg.tar.zst

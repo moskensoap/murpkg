@@ -22,6 +22,7 @@ void info_help_remove();
 void info_help_autoremove();
 void info_help_clean();
 void info_help_help();
+void info_help_version();
 
 
 #endif

@@ -99,8 +99,13 @@ int main(int argc, char *argv[])
                 info_help_help();
                 return 0;
             }
+            if (strcmp(argv[2], "version") == 0)
+            {
+                info_help_version();
+                return 0;
+            }
         }
-        info_help();
+        info_help_help();
         return 0;
     }
     // ######################################init################################################

@@ -17,7 +17,6 @@ extern char rm_PATH[PATH_MAX];
 extern char git_PATH[PATH_MAX];
 extern char ls_PATH[PATH_MAX];
 extern char pacman_PATH[PATH_MAX];
-extern char pactree_PATH[PATH_MAX];
 extern char echo_PATH[PATH_MAX];
 extern char find_PATH[PATH_MAX];
 extern char makepkg_PATH[PATH_MAX];

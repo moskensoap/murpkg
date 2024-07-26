@@ -10,7 +10,7 @@ int show_one_package(const char *name)
 
     if (system(command) != 0)
     {
-        perror("system");
+        printf("Error: %s\n", command);
         return 1;
     }
     return 0;

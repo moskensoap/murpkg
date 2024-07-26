@@ -165,7 +165,7 @@ int reinstall_packages(int argc, char **argv)
     {
         if (system(read_pkg_list.packages[install_order[i]].install_cmds) != 0)
         {
-            perror("system");
+            printf("Error: %s\n", read_pkg_list.packages[install_order[i]].install_cmds);
             free(flag_temp);
             if (free_package_list(&read_pkg_list) != 0)
             {

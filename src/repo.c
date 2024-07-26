@@ -25,7 +25,7 @@ int repo_init()
     snprintf(command_cd_gitclone, sizeof(command_cd_gitclone), "cd %s && %s -rf ./* && %s clone https://github.com/moskensoap/MUR-packages.git", REPO_PATH, rm_PATH, git_PATH);
     if (system(command_cd_gitclone) != 0)
     {
-        perror("system");
+        printf("Error: %s\n", command_cd_gitclone);
         return 1;
     }
 
@@ -80,7 +80,7 @@ int repo_list()
     snprintf(command_cd_ls, sizeof(command_cd_ls), "cd %s && %s -d */", REPO_PATH, ls_PATH);
     if (system(command_cd_ls) != 0)
     {
-        perror("system");
+        printf("Error: %s\n", command_cd_ls);
         return 1;
     }
 
@@ -114,7 +114,7 @@ int repo_add(char *name, char *url)
     snprintf(command_cd_gitclone, sizeof(command_cd_gitclone), "cd %s && %s clone %s", REPO_PATH, git_PATH, url);
     if (system(command_cd_gitclone) != 0)
     {
-        perror("system");
+        printf("Error: %s\n", command_cd_gitclone);
         repo_remove(name);
         return 1;
     }
@@ -214,7 +214,7 @@ int repo_remove(char *name)
                     snprintf(command_rm, sizeof(command_rm), "cd %s && %s -rf %s", REPO_PATH, rm_PATH, REPO_NAME);
                     if (system(command_rm) != 0)
                     {
-                        perror("system");
+                        printf("Error: %s\n", command_rm);
                         free(line);
                         fclose(file);
                         fclose(temp);

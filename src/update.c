@@ -6,7 +6,7 @@ int git_pull_repo(const char *path)
     snprintf(command, sizeof(command), "cd %s && %s reset --hard HEAD > /dev/null 2>&1 && %s clean -fd && %s pull", path, git_PATH, git_PATH, git_PATH);
     if (system(command) != 0)
     {
-        perror("system");
+        printf("Error: %s\n", command);
         return 1;
     }
     return 0;
@@ -47,7 +47,7 @@ int update()
 
             if (git_pull_repo(REPO_PATH_NAME) != 0)
             {
-                perror("git_pull_repo");
+                printf("Error: git_pull_repo(%s)\n", REPO_PATH_NAME);
                 free(line);
                 fclose(file);
                 return 1;

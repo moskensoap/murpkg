@@ -13,7 +13,7 @@ int clean()
             snprintf(command_rm, sizeof(command_rm), "%s -rf %s", rm_PATH, TEMP_PATH);
             if (system(command_rm) != 0)
             {
-                perror("system");
+                printf("Error: %s\n", command_rm);
                 return 1;
             }
 
@@ -41,7 +41,7 @@ int clean()
         snprintf(command_rm, sizeof(command_rm), "%s -rf %s/*", rm_PATH, REPO_PATH);
         if (system(command_rm) != 0)
         {
-            perror("system");
+            printf("Error: %s\n", command_rm);
             return 1;
         }
 
@@ -73,7 +73,7 @@ int clean()
                 snprintf(command_cd_gitclone, sizeof(command_cd_gitclone), "cd %s && %s clone %s", REPO_PATH, git_PATH, line);
                 if (system(command_cd_gitclone) != 0)
                 {
-                    perror("system");
+                    printf("Error: %s\n", command_cd_gitclone);
                     free(line);
                     fclose(file);
                     return 1;

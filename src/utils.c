@@ -42,7 +42,7 @@ int replaceBinary(char *path, char *fileName, char *realName)
     }
     else
     {
-        perror("strstr");
+        printf("Error: replaceBinary strstr\n");
         return 1;
     }
 
@@ -65,7 +65,7 @@ int replacePath(char *path, char *fileName, char *realName)
     }
     else
     {
-        perror("strstr");
+        printf("Error: replacePath strstr\n");
         return 1;
     }
 
@@ -321,7 +321,7 @@ int check_repo_status_and_reclone_if_needed()
                 snprintf(command_rm_rf, sizeof(command_rm_rf), "%s -rf %s", rm_PATH, REPO_PATH_NAME);
                 if (system(command_rm_rf) != 0)
                 {
-                    perror("system");
+                    printf("Error: check_repo_status_and_reclone_if_needed %s\n",command_rm_rf);
                     free(line);
                     fclose(file);
                     return 1;
@@ -331,7 +331,7 @@ int check_repo_status_and_reclone_if_needed()
                 snprintf(command_cd_gitclone, sizeof(command_cd_gitclone), "cd %s && %s clone %s", REPO_PATH, git_PATH, line);
                 if (system(command_cd_gitclone) != 0)
                 {
-                    perror("system");
+                    printf("Error: check_repo_status_and_reclone_if_needed %s\n",command_cd_gitclone);
                     free(line);
                     fclose(file);
                     return 1;

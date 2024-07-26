@@ -45,7 +45,7 @@ int analyze_repo_info()
 
             if (ret != 0)
             {
-                perror("get_repo_info");
+                printf("get_repo_info failed\n");
                 free(line);
                 fclose(file);
                 if (free_package_list(&pkg_list) != 0)
@@ -64,7 +64,7 @@ int analyze_repo_info()
     int ret = generate_package_level(&pkg_list);
     if (ret != 0)
     {
-        perror("generate_package_level");
+        printf("generate_package_level failed\n");
         if (free_package_list(&pkg_list) != 0)
         {
             printf("free_package_list failed\n");
@@ -141,7 +141,7 @@ int get_repo_info(const char *path, PackageList *pkg_list)
         }
         else if (ret != 0)
         {
-            perror("get_PKGBUILD_info");
+            printf("get_PKGBUILD_info failed\n");
             free(line);
             fclose(file);
             pclose(fp);

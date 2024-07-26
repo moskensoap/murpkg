@@ -125,13 +125,14 @@ int remove_package(const char *package)
 
         // Execute the command to remove dependent packages
         int ret = system(newcommand);
-        free(newcommand);
         free(dependent_packages);
         if (ret != 0)
         {
-            perror("system");
+            printf("Error: %s\n", newcommand);
+            free(newcommand);
             return 1;
         }
+        free(newcommand);
     }
     else
     {
@@ -139,7 +140,7 @@ int remove_package(const char *package)
         snprintf(command, sizeof(command), "%s -Rns %s", pacman_PATH, package);
         if (system(command) != 0)
         {
-            perror("system");
+            printf("Error: %s\n", command);
             return 1;
         }
     }

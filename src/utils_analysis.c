@@ -37,7 +37,7 @@ int analyze_repo_info()
             REPO_NAME[last_dot - last_slash - 1] = '\0';
 
             char REPO_PATH_NAME[3 * PATH_MAX];
-            snprintf(REPO_PATH_NAME, sizeof(REPO_PATH_NAME), "%s/%s", REPO_PATH, REPO_NAME);
+            snprintf(REPO_PATH_NAME, sizeof(REPO_PATH_NAME), "%s%s", REPO_PATH, REPO_NAME);
 
             printf("analyzing info of %s\n", REPO_NAME);
 
